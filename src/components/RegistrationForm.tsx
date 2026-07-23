@@ -1,6 +1,7 @@
 "use client";
 
-import { startTransition, useActionState, useRef, useState } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { submitDriverRegistration } from "@/app/actions";
 import { createSupabaseBrowser } from "@/lib/supabase/browser";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -33,7 +34,19 @@ export default function RegistrationForm({
   const [platform, setPlatform] = useState<Platform>(initialPlatform);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowser();
+    supabase.auth.getUser().then(({ data }) => setSignedIn(!!data.user));
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_e, session) =>
+      setSignedIn(!!session?.user)
+    );
+    return () => subscription.unsubscribe();
+  }, []);
   const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(
     submitDriverRegistration,
     null
@@ -82,6 +95,25 @@ export default function RegistrationForm({
 
   const busy = uploading || pending;
 
+  // Registration requires an account so drivers can track status and upload
+  // their remaining documents later from the dashboard.
+  if (signedIn === false) {
+    return (
+      <div className="form-container" id="regForm" style={{ textAlign: "center" }}>
+        <div className="form-title">Sign in to register your car</div>
+        <div className="form-subtitle" style={{ marginBottom: 24 }}>
+          Create a free account (or log in) so you can track your registration
+          status and upload the remaining documents later from your dashboard.
+        </div>
+        <div className="hero-ctas" style={{ justifyContent: "center" }}>
+          <Link href="/login?next=/ride-hailing" className="btn btn-gold">
+            Login / Create Account
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="form-container" id="regForm">
       <div className="form-title">Car Registration Form</div>
@@ -89,6 +121,11 @@ export default function RegistrationForm({
         Fill in your details to begin the registration process for your selected
         platform
       </div>
+      {signedIn === null && (
+        <div className="form-subtitle" style={{ marginTop: -20 }}>
+          Checking your session…
+        </div>
+      )}
 
       <div className="platform-tabs">
         {(Object.keys(platformLabels) as Platform[]).map((p) => (

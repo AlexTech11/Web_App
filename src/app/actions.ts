@@ -63,6 +63,9 @@ export async function submitDriverRegistration(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: "Please sign in to submit your registration." };
+  }
 
   const reference = makeReference();
   const { error } = await supabase
