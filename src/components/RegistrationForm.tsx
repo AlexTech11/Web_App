@@ -18,8 +18,13 @@ const MAX_FILE_BYTES = 5 * 1024 * 1024; // matches the storage bucket limit
 const ACCEPTED = "image/jpeg,image/png,image/webp,application/pdf";
 
 const docFields: { name: string; type: string; label: string }[] = [
-  { name: "doc_licence", type: "drivers_licence", label: "Driver's Licence (photo or PDF)" },
-  { name: "doc_vehicle", type: "vehicle_document", label: "Vehicle Document / Photo" },
+  { name: "doc_vehicle_licence", type: "vehicle_licence", label: "Vehicle Licence" },
+  { name: "doc_car_exterior", type: "car_exterior", label: "Car Photo — Exterior" },
+  { name: "doc_car_interior", type: "car_interior", label: "Car Photo — Interior" },
+  { name: "doc_driver_photo", type: "driver_photo", label: "Driver's Profile Picture" },
+  { name: "doc_drivers_licence", type: "drivers_licence", label: "Driver's Licence" },
+  { name: "doc_nin_slip", type: "nin_slip", label: "NIN Slip" },
+  { name: "doc_insurance", type: "insurance", label: "Insurance Certificate" },
 ];
 
 function safeFileName(name: string): string {
@@ -179,22 +184,33 @@ export default function RegistrationForm({
             </div>
           )}
 
+          <div className="field span2">
+            <div className="docs-heading">Required Documents</div>
+            <span style={{ fontSize: 12, color: "var(--muted)", textTransform: "none", letterSpacing: 0 }}>
+              JPG, PNG, WebP or PDF, max 5 MB each. All documents are required to
+              complete your registration.
+            </span>
+          </div>
           {docFields.map((f) => (
             <div className="field" key={f.name}>
               <label htmlFor={f.name}>{f.label}</label>
-              <input id={f.name} name={f.name} type="file" accept={ACCEPTED} />
+              <input id={f.name} name={f.name} type="file" accept={ACCEPTED} required />
             </div>
           ))}
-          <div className="field span2" style={{ marginTop: -6 }}>
-            <span style={{ fontSize: 12, color: "var(--muted)", textTransform: "none", letterSpacing: 0 }}>
-              Optional — JPG, PNG, WebP or PDF, max 5 MB each. Uploading now
-              speeds up your verification.
-            </span>
-          </div>
 
           <div className="field span2">
             <label htmlFor="notes">Additional Notes</label>
             <textarea id="notes" name="notes" placeholder="Any other information or questions..." />
+          </div>
+
+          <div className="field span2">
+            <label className="agree-check">
+              <input type="checkbox" name="inspection_agreed" required />
+              <span>
+                I agree to bring the vehicle to AfroSamboza for physical
+                inspection as part of the registration process.
+              </span>
+            </label>
           </div>
 
           <TurnstileWidget />

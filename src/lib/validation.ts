@@ -17,7 +17,7 @@ export const documentsSchema = z
       path: z.string().regex(/^registrations\/[\w.-]+$/, "Invalid document path"),
     })
   )
-  .max(5)
+  .max(10)
   .default([]);
 
 export const driverRegistrationSchema = z.object({
@@ -42,6 +42,13 @@ export const driverRegistrationSchema = z.object({
   identity_status: z.string().trim().max(50).optional().transform((v) => v || null),
   service_category: z.string().trim().max(50).optional().transform((v) => v || null),
   notes: z.string().trim().max(2000).optional().transform((v) => v || null),
+  inspection_agreed: z
+    .string()
+    .optional()
+    .transform((v) => v === "on" || v === "true")
+    .refine((v) => v === true, {
+      message: "Please agree to bring the vehicle for inspection",
+    }),
 });
 
 export const listingInterestSchema = z.object({

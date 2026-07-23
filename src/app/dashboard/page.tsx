@@ -117,7 +117,7 @@ export default async function DashboardPage() {
             {regs.length === 0 ? (
               <div className="panel-empty">
                 No registrations yet —{" "}
-                <Link href="/ride-hailing" style={{ color: "#60a5fa" }}>
+                <Link href="/ride-hailing" style={{ color: "#7fc9a6" }}>
                   register your car
                 </Link>
               </div>
@@ -155,7 +155,7 @@ export default async function DashboardPage() {
             {listings.length === 0 ? (
               <div className="panel-empty">
                 Nothing listed yet —{" "}
-                <Link href="/sell" style={{ color: "#60a5fa" }}>
+                <Link href="/sell" style={{ color: "#7fc9a6" }}>
                   sell or rent out an asset
                 </Link>
               </div>

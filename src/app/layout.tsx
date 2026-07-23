@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
-import { DM_Sans, Josefin_Sans, Syne } from "next/font/google";
+import { DM_Sans, Josefin_Sans } from "next/font/google";
 import Topbar from "@/components/Topbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import "./globals.css";
-
-const syne = Syne({
-  variable: "--font-syne",
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
-});
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -48,7 +42,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${syne.variable} ${dmSans.variable} ${josefin.variable}`}
+      className={`${dmSans.variable} ${josefin.variable}`}
     >
       <body>
         <Topbar />

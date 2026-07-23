@@ -76,7 +76,7 @@ export default function ListingsTabs({
       {visible.length === 0 ? (
         <div className="empty-state">
           No live listings in this category yet — check back soon or{" "}
-          <a href="/sell" style={{ color: "#60a5fa" }}>
+          <a href="/sell" style={{ color: "#7fc9a6" }}>
             list yours
           </a>
           .

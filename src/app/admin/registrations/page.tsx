@@ -17,6 +17,17 @@ interface DocRef {
   path: string;
 }
 
+const docLabels: Record<string, string> = {
+  vehicle_licence: "Vehicle Licence",
+  car_exterior: "Car (Exterior)",
+  car_interior: "Car (Interior)",
+  driver_photo: "Driver Photo",
+  drivers_licence: "Driver's Licence",
+  nin_slip: "NIN Slip",
+  insurance: "Insurance",
+  vehicle_document: "Vehicle Doc",
+};
+
 export default async function AdminRegistrationsPage({
   searchParams,
 }: {
@@ -50,7 +61,7 @@ export default async function AdminRegistrationsPage({
         .createSignedUrl(d.path, 3600);
       if (data?.signedUrl) {
         links.push({
-          label: d.type === "drivers_licence" ? "Licence" : "Vehicle doc",
+          label: docLabels[d.type] ?? d.type,
           url: data.signedUrl,
         });
       }
@@ -102,7 +113,7 @@ export default async function AdminRegistrationsPage({
                           href={d.url}
                           target="_blank"
                           rel="noopener"
-                          style={{ color: "#60a5fa", marginRight: 12 }}
+                          style={{ color: "#7fc9a6", marginRight: 12 }}
                         >
                           📎 {d.label}
                         </a>

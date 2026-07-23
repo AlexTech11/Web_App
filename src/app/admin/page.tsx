@@ -109,8 +109,8 @@ export default async function AdminOverviewPage() {
           </div>
           <div className="panel-body" style={{ padding: 22 }}>
             <div className="bar-chart">
-              <Bar label="Cars Sale" value={carSale} max={listingMax} gradient="linear-gradient(90deg,#3b82f6,#1d4ed8)" />
-              <Bar label="Rentals" value={carRent} max={listingMax} gradient="linear-gradient(90deg,#3b82f6,#1d4ed8)" />
+              <Bar label="Cars Sale" value={carSale} max={listingMax} gradient="linear-gradient(90deg,#3f9d7a,#2b7359)" />
+              <Bar label="Rentals" value={carRent} max={listingMax} gradient="linear-gradient(90deg,#3f9d7a,#2b7359)" />
               <Bar label="Houses" value={houseSale + houseRent} max={listingMax} gradient="linear-gradient(90deg,#a855f7,#7c3aed)" />
               <Bar label="Land" value={land} max={listingMax} gradient="linear-gradient(90deg,#14b8a6,#0d9488)" />
             </div>
