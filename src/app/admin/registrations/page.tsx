@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { setRegistrationStatus } from "@/app/admin/actions";
+import { REGISTRATION_DOCS, DOC_LABELS, type DocRef } from "@/lib/documents";
 
 export const dynamic = "force-dynamic";
 
@@ -10,22 +11,6 @@ const platformNames: Record<string, string> = {
   bolt: "⚡ Bolt",
   uber: "🚗 Uber",
   indrive: "🟢 inDrive",
-};
-
-interface DocRef {
-  type: string;
-  path: string;
-}
-
-const docLabels: Record<string, string> = {
-  vehicle_licence: "Vehicle Licence",
-  car_exterior: "Car (Exterior)",
-  car_interior: "Car (Interior)",
-  driver_photo: "Driver Photo",
-  drivers_licence: "Driver's Licence",
-  nin_slip: "NIN Slip",
-  insurance: "Insurance",
-  vehicle_document: "Vehicle Doc",
 };
 
 export default async function AdminRegistrationsPage({
@@ -42,31 +27,26 @@ export default async function AdminRegistrationsPage({
   let query = supabase
     .from("driver_registrations")
     .select(
-      "id, reference_no, platform, full_name, phone, email, state, vehicle_make, vehicle_model, vehicle_year, plate_number, licence_status, identity_status, service_category, notes, status, documents, created_at"
+      "id, reference_no, platform, full_name, phone, email, state, vehicle_make, vehicle_model, vehicle_year, plate_number, licence_status, identity_status, service_category, notes, status, documents, inspection_agreed, created_at"
     )
     .order("created_at", { ascending: false })
     .limit(100);
   if (active !== "all") query = query.eq("status", active);
   const { data: regs } = await query;
 
-  // Signed URLs (1 h) for uploaded documents — staff-only via storage RLS
-  const docLinks = new Map<string, { label: string; url: string }[]>();
+  // Signed URLs (1 h) for uploaded documents, keyed by registration + doc type.
+  // Staff-only via storage RLS.
+  const signedByReg = new Map<string, Map<string, string>>();
   for (const r of regs ?? []) {
     const docs = (r.documents as DocRef[]) ?? [];
-    if (docs.length === 0) continue;
-    const links: { label: string; url: string }[] = [];
+    const byType = new Map<string, string>();
     for (const d of docs) {
       const { data } = await supabase.storage
         .from("documents")
         .createSignedUrl(d.path, 3600);
-      if (data?.signedUrl) {
-        links.push({
-          label: docLabels[d.type] ?? d.type,
-          url: data.signedUrl,
-        });
-      }
+      if (data?.signedUrl) byType.set(d.type, data.signedUrl);
     }
-    docLinks.set(r.id, links);
+    signedByReg.set(r.id, byType);
   }
 
   return (
@@ -90,7 +70,12 @@ export default async function AdminRegistrationsPage({
           {!regs || regs.length === 0 ? (
             <div className="panel-empty">No registrations in this view</div>
           ) : (
-            regs.map((r) => (
+            regs.map((r) => {
+              const signed = signedByReg.get(r.id) ?? new Map<string, string>();
+              const uploadedCount = REGISTRATION_DOCS.filter((d) =>
+                signed.has(d.type)
+              ).length;
+              return (
               <div className="reg-row" key={r.id}>
                 <div className="reg-avatar">🚕</div>
                 <div className="reg-info">
@@ -105,21 +90,37 @@ export default async function AdminRegistrationsPage({
                     {r.reference_no} •{" "}
                     {new Date(r.created_at).toLocaleDateString("en-NG")}
                   </div>
-                  {(docLinks.get(r.id) ?? []).length > 0 && (
-                    <div className="reg-detail">
-                      {(docLinks.get(r.id) ?? []).map((d) => (
+
+                  <div className="reg-detail" style={{ marginTop: 6 }}>
+                    <span className={r.inspection_agreed ? "insp-yes" : "insp-no"}>
+                      {r.inspection_agreed
+                        ? "✓ Agreed to inspection"
+                        : "✗ Inspection not agreed"}
+                    </span>
+                    {"  "}• Documents {uploadedCount}/{REGISTRATION_DOCS.length}
+                  </div>
+
+                  <div className="doc-grid" style={{ marginTop: 6 }}>
+                    {REGISTRATION_DOCS.map((d) => {
+                      const url = signed.get(d.type);
+                      return url ? (
                         <a
-                          key={d.url}
-                          href={d.url}
+                          key={d.type}
+                          href={url}
                           target="_blank"
                           rel="noopener"
-                          style={{ color: "#7fc9a6", marginRight: 12 }}
+                          className="doc-chip done"
                         >
-                          📎 {d.label}
+                          <span>✓</span> {DOC_LABELS[d.type]}
                         </a>
-                      ))}
-                    </div>
-                  )}
+                      ) : (
+                        <span key={d.type} className="doc-chip todo">
+                          <span>○</span> {DOC_LABELS[d.type]}
+                          {!d.core && <em> (later)</em>}
+                        </span>
+                      );
+                    })}
+                  </div>
                   {r.notes && <div className="reg-detail">💬 {r.notes}</div>}
                 </div>
                 <span className={`reg-status status-${r.status}`}>
@@ -143,7 +144,8 @@ export default async function AdminRegistrationsPage({
                   )}
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

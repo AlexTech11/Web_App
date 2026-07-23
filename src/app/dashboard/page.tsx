@@ -3,6 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/types";
+import DashboardDocuments from "@/components/DashboardDocuments";
+import type { DocRef } from "@/lib/documents";
 
 export const metadata: Metadata = {
   title: "My Dashboard",
@@ -123,21 +125,25 @@ export default async function DashboardPage() {
               </div>
             ) : (
               regs.map((r) => (
-                <div className="reg-row" key={r.id}>
-                  <div className="reg-avatar">🚕</div>
-                  <div className="reg-info">
-                    <div className="reg-name">
-                      {r.vehicle_make} {r.vehicle_model}
-                      {r.vehicle_year ? ` ${r.vehicle_year}` : ""}
+                <div key={r.id} className="reg-block">
+                  <div className="reg-row">
+                    <div className="reg-avatar">🚕</div>
+                    <div className="reg-info">
+                      <div className="reg-name">
+                        {r.vehicle_make} {r.vehicle_model}
+                        {r.vehicle_year ? ` ${r.vehicle_year}` : ""}
+                      </div>
+                      <div className="reg-detail">
+                        {platformNames[r.platform] ?? r.platform} • Ref{" "}
+                        {r.reference_no}
+                      </div>
                     </div>
-                    <div className="reg-detail">
-                      {platformNames[r.platform] ?? r.platform} • Ref{" "}
-                      {r.reference_no}
-                      {Array.isArray(r.documents) && r.documents.length > 0 &&
-                        ` • 📎 ${r.documents.length} document${r.documents.length > 1 ? "s" : ""}`}
-                    </div>
+                    <StatusPill status={r.status} />
                   </div>
-                  <StatusPill status={r.status} />
+                  <DashboardDocuments
+                    registrationId={r.id}
+                    documents={(r.documents as DocRef[]) ?? []}
+                  />
                 </div>
               ))
             )}

@@ -4,6 +4,13 @@ import { startTransition, useActionState, useRef, useState } from "react";
 import { submitDriverRegistration } from "@/app/actions";
 import { createSupabaseBrowser } from "@/lib/supabase/browser";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import {
+  ACCEPTED_MIME as ACCEPTED,
+  CORE_DOCS,
+  LATER_DOCS,
+  MAX_DOC_BYTES as MAX_FILE_BYTES,
+  safeFileName,
+} from "@/lib/documents";
 import type { ActionResult, Platform } from "@/lib/types";
 
 const platformLabels: Record<Platform, string> = {
@@ -14,22 +21,9 @@ const platformLabels: Record<Platform, string> = {
 
 const states = ["Abuja (FCT)", "Lagos", "Rivers", "Kano", "Enugu", "Other"];
 
-const MAX_FILE_BYTES = 5 * 1024 * 1024; // matches the storage bucket limit
-const ACCEPTED = "image/jpeg,image/png,image/webp,application/pdf";
-
-const docFields: { name: string; type: string; label: string }[] = [
-  { name: "doc_vehicle_licence", type: "vehicle_licence", label: "Vehicle Licence" },
-  { name: "doc_car_exterior", type: "car_exterior", label: "Car Photo — Exterior" },
-  { name: "doc_car_interior", type: "car_interior", label: "Car Photo — Interior" },
-  { name: "doc_driver_photo", type: "driver_photo", label: "Driver's Profile Picture" },
-  { name: "doc_drivers_licence", type: "drivers_licence", label: "Driver's Licence" },
-  { name: "doc_nin_slip", type: "nin_slip", label: "NIN Slip" },
-  { name: "doc_insurance", type: "insurance", label: "Insurance Certificate" },
-];
-
-function safeFileName(name: string): string {
-  return name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-80);
-}
+// Only the core documents are collected up-front; the rest are uploaded
+// later from the driver's dashboard.
+const docFields = CORE_DOCS;
 
 export default function RegistrationForm({
   initialPlatform = "bolt",
@@ -187,8 +181,9 @@ export default function RegistrationForm({
           <div className="field span2">
             <div className="docs-heading">Required Documents</div>
             <span style={{ fontSize: 12, color: "var(--muted)", textTransform: "none", letterSpacing: 0 }}>
-              JPG, PNG, WebP or PDF, max 5 MB each. All documents are required to
-              complete your registration.
+              JPG, PNG, WebP or PDF, max 5 MB each. Upload these core documents
+              now — you can add the rest ({LATER_DOCS.map((d) => d.label).join(", ")})
+              later from your dashboard after signing in.
             </span>
           </div>
           {docFields.map((f) => (

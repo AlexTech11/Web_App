@@ -483,6 +483,36 @@ footer {
 .status-rejected, .status-cancelled { background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
 .panel-empty { padding: 28px 0; text-align: center; color: var(--muted); font-size: 13px; }
 
+/* ── DOCUMENT CHECKLIST (dashboard + admin) ── */
+.reg-block { border-bottom: 1px solid rgba(63, 157, 122, 0.08); padding-bottom: 14px; margin-bottom: 4px; }
+.reg-block:last-child { border-bottom: none; }
+.reg-block .reg-row { border-bottom: none; }
+.doc-checklist { padding: 0 0 4px 54px; }
+.doc-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.doc-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; padding: 4px 10px; border-radius: 8px;
+  border: 1px solid var(--border); text-decoration: none;
+}
+.doc-chip.done { color: #4ade80; border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.08); }
+.doc-chip.done:hover { background: rgba(34, 197, 94, 0.16); }
+.doc-chip.todo { color: var(--muted); }
+.doc-chip em { font-style: normal; opacity: 0.7; }
+.insp-yes { color: #4ade80; font-weight: 600; }
+.insp-no { color: #fbbf24; font-weight: 600; }
+.doc-upload { margin-top: 14px; }
+.doc-upload-title {
+  font-size: 12px; font-weight: 700; color: var(--text);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+}
+.doc-upload-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px; margin-bottom: 14px;
+}
+.doc-upload-field { display: flex; flex-direction: column; gap: 6px; text-transform: none; letter-spacing: 0; }
+.doc-upload-field > span { font-size: 12px; font-weight: 600; color: var(--muted); }
+@media (max-width: 768px) { .doc-checklist { padding-left: 0; } }
+
 /* ── ADMIN ── */
 .admin-nav { display: flex; gap: 6px; margin-top: 18px; flex-wrap: wrap; }
 .admin-nav a {
