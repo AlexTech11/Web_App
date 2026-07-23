@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useRef, useState } from "react";
 import { submitDriverRegistration } from "@/app/actions";
-import type { ActionResult } from "@/lib/types";
-import type { Platform } from "@/lib/types";
+import { createSupabaseBrowser } from "@/lib/supabase/browser";
+import type { ActionResult, Platform } from "@/lib/types";
 
 const platformLabels: Record<Platform, string> = {
   bolt: "⚡ Bolt",
@@ -13,16 +13,74 @@ const platformLabels: Record<Platform, string> = {
 
 const states = ["Abuja (FCT)", "Lagos", "Rivers", "Kano", "Enugu", "Other"];
 
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // matches the storage bucket limit
+const ACCEPTED = "image/jpeg,image/png,image/webp,application/pdf";
+
+const docFields: { name: string; type: string; label: string }[] = [
+  { name: "doc_licence", type: "drivers_licence", label: "Driver's Licence (photo or PDF)" },
+  { name: "doc_vehicle", type: "vehicle_document", label: "Vehicle Document / Photo" },
+];
+
+function safeFileName(name: string): string {
+  return name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-80);
+}
+
 export default function RegistrationForm({
   initialPlatform = "bolt",
 }: {
   initialPlatform?: Platform;
 }) {
   const [platform, setPlatform] = useState<Platform>(initialPlatform);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(
     submitDriverRegistration,
     null
   );
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setUploadError(null);
+    const formData = new FormData(e.currentTarget);
+
+    // Upload any attached documents straight to Supabase Storage,
+    // then pass only their paths to the server action.
+    const documents: { type: string; path: string }[] = [];
+    const supabase = createSupabaseBrowser();
+
+    setUploading(true);
+    for (const field of docFields) {
+      const file = formData.get(field.name) as File | null;
+      formData.delete(field.name);
+      if (!file || file.size === 0) continue;
+
+      if (file.size > MAX_FILE_BYTES) {
+        setUploadError(`${field.label}: file is larger than 5 MB.`);
+        setUploading(false);
+        return;
+      }
+      const path = `registrations/${crypto.randomUUID()}-${safeFileName(file.name)}`;
+      const { error } = await supabase.storage
+        .from("documents")
+        .upload(path, file, { contentType: file.type });
+      if (error) {
+        console.error("upload failed:", error.message);
+        setUploadError(
+          `${field.label}: upload failed — check your connection and try again.`
+        );
+        setUploading(false);
+        return;
+      }
+      documents.push({ type: field.type, path });
+    }
+    setUploading(false);
+
+    formData.set("documents", JSON.stringify(documents));
+    startTransition(() => formAction(formData));
+  }
+
+  const busy = uploading || pending;
 
   return (
     <div className="form-container" id="regForm">
@@ -45,7 +103,7 @@ export default function RegistrationForm({
         ))}
       </div>
 
-      <form action={formAction}>
+      <form ref={formRef} onSubmit={handleSubmit}>
         <input type="hidden" name="platform" value={platform} />
         <div className="form-grid">
           <div className="field">
@@ -120,6 +178,19 @@ export default function RegistrationForm({
             </div>
           )}
 
+          {docFields.map((f) => (
+            <div className="field" key={f.name}>
+              <label htmlFor={f.name}>{f.label}</label>
+              <input id={f.name} name={f.name} type="file" accept={ACCEPTED} />
+            </div>
+          ))}
+          <div className="field span2" style={{ marginTop: -6 }}>
+            <span style={{ fontSize: 12, color: "var(--muted)", textTransform: "none", letterSpacing: 0 }}>
+              Optional — JPG, PNG, WebP or PDF, max 5 MB each. Uploading now
+              speeds up your verification.
+            </span>
+          </div>
+
           <div className="field span2">
             <label htmlFor="notes">Additional Notes</label>
             <textarea id="notes" name="notes" placeholder="Any other information or questions..." />
@@ -127,8 +198,8 @@ export default function RegistrationForm({
         </div>
 
         <div className="form-actions">
-          <button type="submit" className="btn-primary" disabled={pending}>
-            {pending ? "Submitting..." : "Submit Registration"}
+          <button type="submit" className="btn-primary" disabled={busy}>
+            {uploading ? "Uploading documents..." : pending ? "Submitting..." : "Submit Registration"}
           </button>
           <button type="reset" className="btn btn-outline" style={{ padding: "13px 20px", borderRadius: 10, fontSize: 15 }}>
             Reset
@@ -143,6 +214,7 @@ export default function RegistrationForm({
           <strong>{state.reference}</strong>
         </div>
       )}
+      {uploadError && <div className="error-msg">⚠️ {uploadError}</div>}
       {state && !state.ok && <div className="error-msg">⚠️ {state.error}</div>}
     </div>
   );

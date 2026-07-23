@@ -9,7 +9,19 @@ const optionalEmail = z
   .union([z.string().trim().email("Enter a valid email address"), z.literal("")])
   .transform((v) => (v === "" ? null : v));
 
+/** Paths of files already uploaded to the private 'documents' bucket. */
+export const documentsSchema = z
+  .array(
+    z.object({
+      type: z.string().max(40),
+      path: z.string().regex(/^registrations\/[\w.-]+$/, "Invalid document path"),
+    })
+  )
+  .max(5)
+  .default([]);
+
 export const driverRegistrationSchema = z.object({
+  documents: documentsSchema,
   platform: z.enum(["bolt", "uber", "indrive"]),
   full_name: z.string().trim().min(3, "Full name is required"),
   phone,

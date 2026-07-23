@@ -1,6 +1,6 @@
 "use server";
 
-import { getSupabase } from "@/lib/supabase";
+import { createSupabaseServer } from "@/lib/supabase/server";
 import {
   bookingSchema,
   driverRegistrationSchema,
@@ -25,15 +25,25 @@ export async function submitDriverRegistration(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
-  const parsed = driverRegistrationSchema.safeParse(
-    Object.fromEntries(formData.entries())
-  );
+  const raw: Record<string, unknown> = Object.fromEntries(formData.entries());
+  try {
+    raw.documents = raw.documents ? JSON.parse(raw.documents as string) : [];
+  } catch {
+    raw.documents = [];
+  }
+
+  const parsed = driverRegistrationSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstError(parsed.error) };
 
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const reference = makeReference();
-  const { error } = await getSupabase()
+  const { error } = await supabase
     .from("driver_registrations")
-    .insert({ ...parsed.data, reference_no: reference });
+    .insert({ ...parsed.data, reference_no: reference, user_id: user?.id ?? null });
 
   if (error) {
     console.error("driver_registrations insert failed:", error.message);
@@ -59,10 +69,20 @@ export async function submitListingInterest(
   const parsed = listingInterestSchema.safeParse({ ...raw, attributes });
   if (!parsed.success) return { ok: false, error: firstError(parsed.error) };
 
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const reference = makeReference();
-  const { error } = await getSupabase()
+  const { error } = await supabase
     .from("listings")
-    .insert({ ...parsed.data, reference_no: reference, status: "pending" });
+    .insert({
+      ...parsed.data,
+      reference_no: reference,
+      status: "pending",
+      owner_id: user?.id ?? null,
+    });
 
   if (error) {
     console.error("listings insert failed:", error.message);
@@ -81,7 +101,8 @@ export async function submitEnquiry(
   const parsed = enquirySchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstError(parsed.error) };
 
-  const { error } = await getSupabase().from("enquiries").insert(parsed.data);
+  const supabase = await createSupabaseServer();
+  const { error } = await supabase.from("enquiries").insert(parsed.data);
 
   if (error) {
     console.error("enquiries insert failed:", error.message);
@@ -100,10 +121,15 @@ export async function submitBooking(
   const parsed = bookingSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstError(parsed.error) };
 
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const reference = makeReference("BK");
-  const { error } = await getSupabase()
+  const { error } = await supabase
     .from("bookings")
-    .insert({ ...parsed.data, reference_no: reference });
+    .insert({ ...parsed.data, reference_no: reference, customer_id: user?.id ?? null });
 
   if (error) {
     console.error("bookings insert failed:", error.message);

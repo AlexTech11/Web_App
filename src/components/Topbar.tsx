@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import AuthButtons from "@/components/AuthButtons";
 
 const links = [
   { href: "/", label: "Home" },
@@ -34,12 +35,7 @@ export default function Topbar() {
         ))}
       </nav>
       <div className="topbar-actions">
-        <Link href="/dashboard" className="btn btn-outline btn-sm">
-          Login
-        </Link>
-        <Link href="/ride-hailing" className="btn btn-gold btn-sm">
-          Register Car
-        </Link>
+        <AuthButtons />
       </div>
     </div>
   );
