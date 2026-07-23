@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "AfroSamboza staff & admin dashboard.",
 };
 
-const links = [
+const baseLinks = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/registrations", label: "Registrations" },
   { href: "/admin/listings", label: "Listings" },
@@ -36,6 +36,11 @@ export default async function AdminLayout({
   if (!profile || !["staff", "admin"].includes(profile.role)) {
     redirect("/dashboard");
   }
+
+  const links =
+    profile.role === "admin"
+      ? [...baseLinks, { href: "/admin/staff", label: "Staff" }]
+      : baseLinks;
 
   return (
     <>

@@ -8,6 +8,9 @@ import {
   listingInterestSchema,
 } from "@/lib/validation";
 import type { ActionResult } from "@/lib/types";
+import { verifyTurnstile } from "@/lib/turnstile";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { headers } from "next/headers";
 import { z } from "zod";
 
 /** Reference numbers in the AS-XXXXXX format shown to customers. */
@@ -21,10 +24,31 @@ function firstError(error: z.ZodError): string {
   return error.issues[0]?.message ?? "Please check the form and try again.";
 }
 
+/**
+ * Anti-abuse gate for public submissions. Both checks are no-ops until their
+ * feature flags are enabled (Phase 4), so this is safe to call everywhere now.
+ */
+async function guardSubmission(formData: FormData): Promise<ActionResult | null> {
+  const token = (formData.get("cf-turnstile-response") as string) || null;
+  if (!(await verifyTurnstile(token))) {
+    return { ok: false, error: "Spam check failed — please try again." };
+  }
+  const hdrs = await headers();
+  const ip =
+    hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || "anonymous";
+  if (!(await checkRateLimit(ip)).ok) {
+    return { ok: false, error: "Too many submissions — please try again later." };
+  }
+  return null;
+}
+
 export async function submitDriverRegistration(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
+  const blocked = await guardSubmission(formData);
+  if (blocked) return blocked;
+
   const raw: Record<string, unknown> = Object.fromEntries(formData.entries());
   try {
     raw.documents = raw.documents ? JSON.parse(raw.documents as string) : [];
@@ -56,6 +80,9 @@ export async function submitListingInterest(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
+  const blocked = await guardSubmission(formData);
+  if (blocked) return blocked;
+
   const raw = Object.fromEntries(formData.entries());
 
   // Collect attr_* fields (mileage, beds, size, title_doc...) into jsonb attributes
@@ -95,6 +122,9 @@ export async function submitEnquiry(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
+  const blocked = await guardSubmission(formData);
+  if (blocked) return blocked;
+
   const raw = Object.fromEntries(formData.entries());
   if (raw.listing_id === "") delete raw.listing_id;
 
@@ -115,6 +145,9 @@ export async function submitBooking(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
+  const blocked = await guardSubmission(formData);
+  if (blocked) return blocked;
+
   const raw = Object.fromEntries(formData.entries());
   if (raw.listing_id === "") delete raw.listing_id;
 

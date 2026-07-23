@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { submitBooking, submitEnquiry } from "@/app/actions";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import type { ActionResult, Listing } from "@/lib/types";
 
 export function EnquiryModal({
@@ -58,6 +59,7 @@ export function EnquiryModal({
                   required
                 />
               </div>
+              <TurnstileWidget />
             </div>
             {state && !state.ok && <div className="error-msg">⚠️ {state.error}</div>}
             <div className="form-actions">
@@ -134,6 +136,7 @@ export function BookingModal({
                 <label htmlFor="bk-location">Pickup Location</label>
                 <input id="bk-location" name="pickup_location" type="text" placeholder="Address or landmark" />
               </div>
+              <TurnstileWidget />
             </div>
             {state && !state.ok && <div className="error-msg">⚠️ {state.error}</div>}
             <div className="form-actions">

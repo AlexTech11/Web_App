@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { submitListingInterest } from "@/app/actions";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import type { ActionResult, ListingType } from "@/lib/types";
 
 const interestTypes: { id: ListingType; icon: string; label: string }[] = [
@@ -192,6 +193,8 @@ export default function SellForm() {
               }
             />
           </div>
+
+          <TurnstileWidget />
         </div>
 
         <div className="form-actions" style={{ marginTop: 28 }}>

@@ -71,3 +71,39 @@ export async function setEnquiryStatus(id: string, status: string): Promise<void
 export async function setBookingStatus(id: string, status: string): Promise<void> {
   await setStatus("bookings", id, status);
 }
+
+/** Admin-only: change a user's role. RLS also requires is_admin() to update. */
+export async function setUserRole(userId: string, role: string): Promise<void> {
+  if (!["customer", "staff", "admin"].includes(role)) return;
+
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || user.id === userId) return; // can't change your own role
+
+  const { data: me } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (me?.role !== "admin") return;
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ role, updated_at: new Date().toISOString() })
+    .eq("id", userId);
+  if (error) {
+    console.error("role update failed:", error.message);
+    return;
+  }
+
+  await supabase.from("staff_activity").insert({
+    staff_id: user.id,
+    action: `set_role:${role}`,
+    entity_type: "profiles",
+    entity_id: userId,
+  });
+
+  revalidatePath("/admin/staff");
+}

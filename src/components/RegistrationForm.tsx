@@ -3,6 +3,7 @@
 import { startTransition, useActionState, useRef, useState } from "react";
 import { submitDriverRegistration } from "@/app/actions";
 import { createSupabaseBrowser } from "@/lib/supabase/browser";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import type { ActionResult, Platform } from "@/lib/types";
 
 const platformLabels: Record<Platform, string> = {
@@ -195,6 +196,8 @@ export default function RegistrationForm({
             <label htmlFor="notes">Additional Notes</label>
             <textarea id="notes" name="notes" placeholder="Any other information or questions..." />
           </div>
+
+          <TurnstileWidget />
         </div>
 
         <div className="form-actions">

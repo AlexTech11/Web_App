@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BookingModal, EnquiryModal } from "@/components/ListingModals";
 import { formatPrice, type Listing } from "@/lib/types";
+import { whatsappLink } from "@/lib/whatsapp";
 
 type TabId = "cars-sale" | "cars-rent" | "properties";
 
@@ -110,12 +111,16 @@ export default function ListingsTabs({
                   >
                     {isRental ? "Book Now" : "Enquire"}
                   </button>
-                  <button
-                    className="btn btn-outline btn-sm"
-                    onClick={() => setModal({ kind: "enquiry", listing: l })}
+                  <a
+                    className="btn btn-outline btn-sm wa-inline"
+                    href={whatsappLink(
+                      `Hello AfroSamboza, I'm interested in ${l.title} (${l.reference_no}) at ${formatPrice(l)}. Is it still available?`
+                    )}
+                    target="_blank"
+                    rel="noopener"
                   >
-                    Details
-                  </button>
+                    WhatsApp
+                  </a>
                 </div>
               </div>
             );
