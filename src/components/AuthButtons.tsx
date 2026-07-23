@@ -7,19 +7,36 @@ import { createSupabaseBrowser } from "@/lib/supabase/browser";
 
 export default function AuthButtons() {
   const [email, setEmail] = useState<string | null>(null);
+  const [isStaff, setIsStaff] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const supabase = createSupabaseBrowser();
+
+    async function loadRole(userId: string | undefined) {
+      if (!userId) {
+        setIsStaff(false);
+        return;
+      }
+      const { data } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
+      setIsStaff(data?.role === "staff" || data?.role === "admin");
+    }
+
     supabase.auth.getUser().then(({ data }) => {
       setEmail(data.user?.email ?? null);
+      loadRole(data.user?.id);
       setLoaded(true);
     });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setEmail(session?.user?.email ?? null);
+      loadRole(session?.user?.id);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -38,6 +55,11 @@ export default function AuthButtons() {
   if (email) {
     return (
       <>
+        {isStaff && (
+          <Link href="/admin" className="btn btn-outline btn-sm">
+            Admin
+          </Link>
+        )}
         <Link href="/dashboard" className="btn btn-outline btn-sm">
           My Dashboard
         </Link>

@@ -454,6 +454,30 @@ footer {
 .status-rejected, .status-cancelled { background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
 .panel-empty { padding: 28px 0; text-align: center; color: var(--muted); font-size: 13px; }
 
+/* ── ADMIN ── */
+.admin-nav { display: flex; gap: 6px; margin-top: 18px; flex-wrap: wrap; }
+.admin-nav a {
+  padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  color: var(--muted); text-decoration: none; border: 1px solid var(--border);
+  transition: var(--transition);
+}
+.admin-nav a:hover { color: var(--text); border-color: rgba(59, 130, 246, 0.4); }
+.admin-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.admin-filters .tab-btn {
+  padding: 6px 12px; font-size: 12px; border-radius: 8px;
+  text-decoration: none; text-transform: capitalize;
+}
+.admin-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.admin-actions form { display: inline; }
+.btn-sm.danger { border-color: rgba(239, 68, 68, 0.35); color: #f87171; }
+.btn-sm.danger:hover { border-color: #ef4444; background: rgba(239, 68, 68, 0.08); color: #f87171; }
+.bar-chart { display: flex; flex-direction: column; gap: 16px; }
+.bar-row { display: flex; align-items: center; gap: 14px; }
+.bar-label { font-size: 13px; width: 82px; color: #8899bb; flex-shrink: 0; font-weight: 500; }
+.bar-track { flex: 1; background: rgba(59, 130, 246, 0.08); border-radius: 6px; height: 10px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 6px; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.bar-val { font-size: 13px; font-weight: 700; width: 40px; text-align: right; flex-shrink: 0; color: #c8d8f0; }
+
 @media (max-width: 768px) {
   .dash-content { grid-template-columns: 1fr; }
   .dash-panel.full { grid-column: span 1; }
