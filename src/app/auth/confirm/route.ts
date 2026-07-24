@@ -27,5 +27,11 @@ export async function GET(request: NextRequest) {
     if (!error) return NextResponse.redirect(new URL(next, request.url));
   }
 
-  return NextResponse.redirect(new URL("/login?error=confirm", request.url));
+  // On failure, send recovery attempts to the reset page (which shows a clear
+  // "link expired" prompt); everything else to login.
+  const failTarget =
+    next === "/reset-password" || type === "recovery"
+      ? "/reset-password"
+      : "/login?error=confirm";
+  return NextResponse.redirect(new URL(failTarget, request.url));
 }
