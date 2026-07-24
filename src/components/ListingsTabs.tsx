@@ -86,11 +86,28 @@ export default function ListingsTabs({
           {visible.map((l) => {
             const badge = badgeOf(l);
             const isRental = l.type === "car_rent";
+            const photos = Array.isArray(l.attributes.photos)
+              ? (l.attributes.photos as string[])
+              : [];
             return (
               <div key={l.id} className="listing-card">
-                <div className="listing-img">
-                  {(l.attributes.emoji as string) ?? "🚗"}
+                <div
+                  className="listing-img"
+                  style={
+                    photos[0]
+                      ? {
+                          backgroundImage: `url(${photos[0]})`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                        }
+                      : undefined
+                  }
+                >
+                  {!photos[0] && ((l.attributes.emoji as string) ?? "🚗")}
                   <div className={`listing-badge ${badge.cls}`}>{badge.label}</div>
+                  {photos.length > 1 && (
+                    <div className="listing-photo-count">📷 {photos.length}</div>
+                  )}
                 </div>
                 <div className="listing-body">
                   <div className="listing-title">{l.title}</div>

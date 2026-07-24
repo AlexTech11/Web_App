@@ -96,6 +96,18 @@ export async function submitListingInterest(
     }
   }
 
+  // Listing photos (public URLs uploaded client-side), capped at 10.
+  if (typeof raw.photos === "string" && raw.photos) {
+    try {
+      const photos = JSON.parse(raw.photos);
+      if (Array.isArray(photos) && photos.length > 0) {
+        attributes.photos = photos.slice(0, 10);
+      }
+    } catch {
+      /* ignore malformed photos payload */
+    }
+  }
+
   const parsed = listingInterestSchema.safeParse({ ...raw, attributes });
   if (!parsed.success) return { ok: false, error: firstError(parsed.error) };
 

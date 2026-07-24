@@ -58,7 +58,7 @@ export async function signUp(
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/auth/confirm`,
+      emailRedirectTo: `${origin}/auth/callback?next=/dashboard`,
       data: { full_name, phone },
     },
   });
@@ -97,7 +97,7 @@ export async function requestPasswordReset(
   const origin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${origin}/auth/confirm?next=/reset-password`,
+    redirectTo: `${origin}/auth/callback?next=/reset-password`,
   });
   // Never reveal whether an email is registered.
   if (error) console.error("password reset request failed:", error.message);

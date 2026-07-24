@@ -312,6 +312,12 @@ textarea { resize: vertical; min-height: 100px; }
 .listing-badge.sale { color: #22c55e; border-color: rgba(34, 197, 94, 0.3); }
 .listing-badge.rent { color: #7fc9a6; border-color: rgba(63, 157, 122, 0.3); }
 .listing-badge.new { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
+.listing-photo-count {
+  position: absolute; bottom: 12px; right: 12px;
+  background: rgba(5, 8, 16, 0.75); backdrop-filter: blur(8px);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 3px 9px; font-size: 12px; font-weight: 600;
+}
 .listing-body { padding: 18px; }
 .listing-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
 .listing-sub { font-size: 13px; color: var(--muted); margin-bottom: 12px; }

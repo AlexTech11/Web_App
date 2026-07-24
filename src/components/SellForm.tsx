@@ -1,7 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useState } from "react";
 import { submitListingInterest } from "@/app/actions";
+import { createSupabaseBrowser } from "@/lib/supabase/browser";
+import { MAX_DOC_BYTES, safeFileName } from "@/lib/documents";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import type { ActionResult, ListingType } from "@/lib/types";
 
@@ -13,14 +15,64 @@ const interestTypes: { id: ListingType; icon: string; label: string }[] = [
   { id: "land", icon: "🌳", label: "Sell Land" },
 ];
 
+const MAX_PHOTOS = 10;
+
 export default function SellForm() {
   const [type, setType] = useState<ListingType>("car_sale");
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(
     submitListingInterest,
     null
   );
 
   const isRental = type === "car_rent" || type === "house_rent";
+
+  function onPickPhotos(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []).slice(0, MAX_PHOTOS);
+    setUploadError(
+      (e.target.files?.length ?? 0) > MAX_PHOTOS
+        ? `You can upload up to ${MAX_PHOTOS} photos — only the first ${MAX_PHOTOS} were kept.`
+        : null
+    );
+    setPhotos(files);
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setUploadError(null);
+    const formData = new FormData(e.currentTarget);
+    formData.delete("photo_files");
+
+    if (photos.length > 0) {
+      const supabase = createSupabaseBrowser();
+      const urls: string[] = [];
+      setUploading(true);
+      for (const file of photos) {
+        if (file.size > MAX_DOC_BYTES) {
+          setUploadError(`${file.name}: image is larger than 5 MB.`);
+          setUploading(false);
+          return;
+        }
+        const path = `listings/${crypto.randomUUID()}-${safeFileName(file.name)}`;
+        const { error } = await supabase.storage
+          .from("listing-photos")
+          .upload(path, file, { contentType: file.type });
+        if (error) {
+          setUploadError("A photo failed to upload — check your connection and try again.");
+          setUploading(false);
+          return;
+        }
+        const { data } = supabase.storage.from("listing-photos").getPublicUrl(path);
+        urls.push(data.publicUrl);
+      }
+      setUploading(false);
+      formData.set("photos", JSON.stringify(urls));
+    }
+
+    startTransition(() => formAction(formData));
+  }
 
   return (
     <div className="form-container wide">
@@ -42,7 +94,7 @@ export default function SellForm() {
         ))}
       </div>
 
-      <form action={formAction}>
+      <form onSubmit={handleSubmit}>
         <input type="hidden" name="type" value={type} />
         {isRental && (
           <input type="hidden" name="price_period" value={type === "car_rent" ? "day" : "year"} />
@@ -194,12 +246,30 @@ export default function SellForm() {
             />
           </div>
 
+          <div className="field span2">
+            <label htmlFor="photo_files">Photos (up to {MAX_PHOTOS})</label>
+            <input
+              id="photo_files"
+              name="photo_files"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              onChange={onPickPhotos}
+            />
+            <span style={{ fontSize: 12, color: "var(--muted)", textTransform: "none", letterSpacing: 0 }}>
+              JPG, PNG or WebP, max 5 MB each. Clear photos get more enquiries.
+              {photos.length > 0 && ` — ${photos.length} selected`}
+            </span>
+          </div>
+
           <TurnstileWidget />
         </div>
 
+        {uploadError && <div className="error-msg">⚠️ {uploadError}</div>}
+
         <div className="form-actions" style={{ marginTop: 28 }}>
-          <button type="submit" className="btn-primary" disabled={pending}>
-            {pending ? "Submitting..." : "Submit Listing Interest"}
+          <button type="submit" className="btn-primary" disabled={pending || uploading}>
+            {uploading ? "Uploading photos..." : pending ? "Submitting..." : "Submit Listing Interest"}
           </button>
         </div>
       </form>
