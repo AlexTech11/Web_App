@@ -3,6 +3,7 @@ import { DM_Sans, Josefin_Sans } from "next/font/google";
 import Topbar from "@/components/Topbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { createSupabaseServer } from "@/lib/supabase/server";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -34,18 +35,35 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Resolve auth state on the server so the header always matches the session
+  // the rest of the app sees (avoids the "logged in but header says Login" desync).
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let isStaff = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    isStaff = profile?.role === "staff" || profile?.role === "admin";
+  }
+
   return (
     <html
       lang="en"
       className={`${dmSans.variable} ${josefin.variable}`}
     >
       <body>
-        <Topbar />
+        <Topbar initialEmail={user?.email ?? null} initialIsStaff={isStaff} />
         <main>{children}</main>
         <Footer />
         <WhatsAppButton />

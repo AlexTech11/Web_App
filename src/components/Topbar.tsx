@@ -12,7 +12,13 @@ const links = [
   { href: "/dashboard", label: "Dashboard" },
 ];
 
-export default function Topbar() {
+export default function Topbar({
+  initialEmail,
+  initialIsStaff,
+}: {
+  initialEmail: string | null;
+  initialIsStaff: boolean;
+}) {
   const pathname = usePathname();
 
   return (
@@ -35,7 +41,7 @@ export default function Topbar() {
         ))}
       </nav>
       <div className="topbar-actions">
-        <AuthButtons />
+        <AuthButtons initialEmail={initialEmail} initialIsStaff={initialIsStaff} />
       </div>
     </div>
   );

@@ -83,19 +83,19 @@ export default async function DashboardPage() {
       </div>
 
       <div className="metrics-grid">
-        <div className="metric-card">
+        <a href="#panel-registrations" className="metric-card">
           <div className="metric-label">My Registrations</div>
           <div className="metric-val">{regs.length}</div>
-        </div>
-        <div className="metric-card green">
+        </a>
+        <a href="#panel-listings" className="metric-card green">
           <div className="metric-label">My Listings</div>
           <div className="metric-val">{listings.length}</div>
-        </div>
-        <div className="metric-card purple">
+        </a>
+        <a href="#panel-bookings" className="metric-card purple">
           <div className="metric-label">My Bookings</div>
           <div className="metric-val">{bookings.length}</div>
-        </div>
-        <div className="metric-card amber">
+        </a>
+        <a href="#panel-registrations" className="metric-card amber">
           <div className="metric-label">Pending Review</div>
           <div className="metric-val">
             {
@@ -104,11 +104,11 @@ export default async function DashboardPage() {
               ).length
             }
           </div>
-        </div>
+        </a>
       </div>
 
       <div className="dash-content">
-        <div className="dash-panel">
+        <div className="dash-panel" id="panel-registrations">
           <div className="panel-header">
             <div className="panel-title">Ride-Hailing Registrations</div>
             <Link href="/ride-hailing" className="btn btn-outline btn-sm">
@@ -150,7 +150,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="dash-panel">
+        <div className="dash-panel" id="panel-listings">
           <div className="panel-header">
             <div className="panel-title">My Listings</div>
             <Link href="/sell" className="btn btn-outline btn-sm">
@@ -184,7 +184,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="dash-panel full">
+        <div className="dash-panel full" id="panel-bookings">
           <div className="panel-header">
             <div className="panel-title">Rental Bookings</div>
             <Link href="/listings?tab=cars-rent" className="btn btn-outline btn-sm">

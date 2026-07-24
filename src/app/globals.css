@@ -423,8 +423,17 @@ footer {
   border-radius: var(--radius); padding: 24px;
   position: relative; overflow: hidden;
   transition: var(--transition);
+  display: block; text-decoration: none; color: inherit;
 }
+a.metric-card { cursor: pointer; }
+a.metric-card::after {
+  content: "→"; position: absolute; top: 16px; right: 18px;
+  color: var(--muted); font-size: 15px; opacity: 0;
+  transition: var(--transition);
+}
+a.metric-card:hover::after { opacity: 1; transform: translateX(3px); }
 .metric-card:hover { border-color: rgba(63, 157, 122, 0.35); transform: translateY(-2px); }
+.dash-panel { scroll-margin-top: 80px; }
 .metric-card::before {
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
   background: var(--m-accent, linear-gradient(90deg, #3f9d7a, #2b7359));

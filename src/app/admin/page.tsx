@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -59,34 +60,34 @@ export default async function AdminOverviewPage() {
   return (
     <>
       <div className="metrics-grid">
-        <div className="metric-card">
+        <Link href="/admin/registrations" className="metric-card">
           <div className="metric-label">Total Registrations</div>
           <div className="metric-val">{totalRegs}</div>
-        </div>
-        <div className="metric-card amber">
+        </Link>
+        <Link href="/admin/registrations?status=pending" className="metric-card amber">
           <div className="metric-label">Pending Registrations</div>
           <div className="metric-val">{pendingRegs}</div>
-        </div>
-        <div className="metric-card green">
+        </Link>
+        <Link href="/admin/registrations?status=approved" className="metric-card green">
           <div className="metric-label">Approved Drivers</div>
           <div className="metric-val">{approvedRegs}</div>
-        </div>
-        <div className="metric-card">
+        </Link>
+        <Link href="/admin/listings?status=live" className="metric-card">
           <div className="metric-label">Live Listings</div>
           <div className="metric-val">{liveListings}</div>
-        </div>
-        <div className="metric-card amber">
+        </Link>
+        <Link href="/admin/listings?status=pending" className="metric-card amber">
           <div className="metric-label">Listings Awaiting Review</div>
           <div className="metric-val">{pendingListings}</div>
-        </div>
-        <div className="metric-card purple">
+        </Link>
+        <Link href="/admin/enquiries" className="metric-card purple">
           <div className="metric-label">New Enquiries</div>
           <div className="metric-val">{newEnquiries}</div>
-        </div>
-        <div className="metric-card purple">
+        </Link>
+        <Link href="/admin/bookings" className="metric-card purple">
           <div className="metric-label">Booking Requests</div>
           <div className="metric-val">{requestedBookings}</div>
-        </div>
+        </Link>
       </div>
 
       <div className="dash-content">

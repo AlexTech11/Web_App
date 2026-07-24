@@ -24,8 +24,9 @@ export default async function LoginPage({
       </div>
       {error === "confirm" && (
         <div className="error-msg" style={{ maxWidth: 460, margin: "0 auto 20px" }}>
-          ⚠️ That confirmation link is invalid or has expired. Try signing in,
-          or register again to receive a new link.
+          ℹ️ We couldn&apos;t auto-confirm that link (it may already have been
+          used). Your account is likely confirmed already — just sign in below.
+          If it still won&apos;t work, register again for a fresh link.
         </div>
       )}
       <AuthForm next={next} />

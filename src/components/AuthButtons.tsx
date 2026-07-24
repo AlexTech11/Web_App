@@ -5,38 +5,38 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase/browser";
 
-export default function AuthButtons() {
-  const [email, setEmail] = useState<string | null>(null);
-  const [isStaff, setIsStaff] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+export default function AuthButtons({
+  initialEmail,
+  initialIsStaff,
+}: {
+  initialEmail: string | null;
+  initialIsStaff: boolean;
+}) {
+  // Seed from the server-resolved session so the header is correct on first
+  // paint; keep it in sync on client-side sign-in / sign-out.
+  const [email, setEmail] = useState<string | null>(initialEmail);
+  const [isStaff, setIsStaff] = useState(initialIsStaff);
   const router = useRouter();
 
   useEffect(() => {
     const supabase = createSupabaseBrowser();
-
-    async function loadRole(userId: string | undefined) {
-      if (!userId) {
-        setIsStaff(false);
-        return;
-      }
-      const { data } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .single();
-      setIsStaff(data?.role === "staff" || data?.role === "admin");
-    }
-
-    supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? null);
-      loadRole(data.user?.id);
-      setLoaded(true);
-    });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setEmail(session?.user?.email ?? null);
-      loadRole(session?.user?.id);
+      const user = session?.user;
+      setEmail(user?.email ?? null);
+      if (!user) {
+        setIsStaff(false);
+        return;
+      }
+      supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single()
+        .then(({ data }) =>
+          setIsStaff(data?.role === "staff" || data?.role === "admin")
+        );
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -44,12 +44,10 @@ export default function AuthButtons() {
   async function handleSignOut() {
     const supabase = createSupabaseBrowser();
     await supabase.auth.signOut();
+    setEmail(null);
+    setIsStaff(false);
     router.push("/");
     router.refresh();
-  }
-
-  if (!loaded) {
-    return <span style={{ width: 120 }} />;
   }
 
   if (email) {
