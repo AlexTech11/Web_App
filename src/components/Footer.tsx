@@ -20,7 +20,7 @@ export default function Footer() {
             <a href="tel:07063857328">📞 0706 385 7328</a>
             <a href="tel:09125078090">📞 0912 507 8090</a>
             <a href="mailto:hello@afrosamboza.com.ng">📧 hello@afrosamboza.com.ng</a>
-            <a href="#">📍 Suite D27, Efab Shopping Mall, Area 11, Abuja, FCT</a>
+            <Link href="/contact">📍 Suite D27, Efab Shopping Mall, Area 11, Abuja, FCT</Link>
           </div>
         </div>
         <div className="footer-col">
@@ -40,11 +40,11 @@ export default function Footer() {
         </div>
         <div className="footer-col">
           <h4>Company</h4>
-          <a href="#">About Us</a>
-          <a href="#">CEO: Alex Ukpong</a>
-          <a href="#">Contact Us</a>
+          <Link href="/about">About Us</Link>
+          <Link href="/about#leadership">Leadership</Link>
+          <Link href="/contact">Contact Us</Link>
           <Link href="/dashboard">Dashboard</Link>
-          <a href="#">Privacy Policy</a>
+          <Link href="/privacy">Privacy Policy</Link>
         </div>
       </div>
       <div className="footer-bottom">
