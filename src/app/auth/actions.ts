@@ -76,6 +76,67 @@ export async function signUp(
   };
 }
 
+const emailSchema = z.object({
+  email: z.string().trim().email("Enter a valid email address"),
+});
+
+const passwordOnlySchema = z.object({
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+/** Step 1 of recovery: email the user a password-reset link. */
+export async function requestPasswordReset(
+  _prev: AuthResult | null,
+  formData: FormData
+): Promise<AuthResult> {
+  const parsed = emailSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success)
+    return { ok: false, error: parsed.error.issues[0].message };
+
+  const supabase = await createSupabaseServer();
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${origin}/auth/confirm?next=/reset-password`,
+  });
+  // Never reveal whether an email is registered.
+  if (error) console.error("password reset request failed:", error.message);
+
+  return {
+    ok: true,
+    message:
+      "If that email is registered, a password-reset link is on its way. Check your inbox (and spam).",
+  };
+}
+
+/** Step 2 of recovery: set a new password using the recovery session. */
+export async function updatePassword(
+  _prev: AuthResult | null,
+  formData: FormData
+): Promise<AuthResult> {
+  const parsed = passwordOnlySchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success)
+    return { ok: false, error: parsed.error.issues[0].message };
+
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return {
+      ok: false,
+      error: "Your reset link has expired. Please request a new one.",
+    };
+
+  const { error } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+  });
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
+}
+
 export async function signOut(): Promise<void> {
   const supabase = await createSupabaseServer();
   await supabase.auth.signOut();

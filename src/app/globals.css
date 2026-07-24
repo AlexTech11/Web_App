@@ -435,6 +435,14 @@ a.metric-card:hover::after { opacity: 1; transform: translateX(3px); }
 .metric-card:hover { border-color: rgba(63, 157, 122, 0.35); transform: translateY(-2px); }
 .dash-panel { scroll-margin-top: 80px; }
 
+/* ── LINK-STYLE BUTTON (forgot password, etc.) ── */
+.link-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: #7fc9a6; font-family: inherit; font-size: 13px;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.link-btn:hover { color: var(--text); }
+
 /* ── PROSE (about / privacy) ── */
 .prose { max-width: 760px; margin: 0 auto; color: var(--text); }
 .prose p { color: var(--muted); margin: 0 0 16px; line-height: 1.8; }
