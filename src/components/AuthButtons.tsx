@@ -18,6 +18,15 @@ export default function AuthButtons({
   const [isStaff, setIsStaff] = useState(initialIsStaff);
   const router = useRouter();
 
+  // The root layout re-renders server-side after login/logout (revalidate +
+  // refresh) and passes fresh props. useState ignores prop changes, so sync
+  // them here — otherwise the header keeps its first-mount state (e.g. still
+  // shows "Login" after signing in) until a full page reload.
+  useEffect(() => {
+    setEmail(initialEmail);
+    setIsStaff(initialIsStaff);
+  }, [initialEmail, initialIsStaff]);
+
   useEffect(() => {
     const supabase = createSupabaseBrowser();
     const {
