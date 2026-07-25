@@ -100,7 +100,7 @@ export default async function AdminStaffPage({
                         action={deleteUser}
                         id={p.id}
                         label="Delete User"
-                        confirmText={`Permanently delete ${p.full_name || p.email || "this user"}'s account? This removes their login and cannot be undone.`}
+                        confirmText={`Permanently delete ${p.full_name || p.email || "this user"}'s account AND all their listings, registrations, bookings and uploaded files? This cannot be undone.`}
                       />
                     </div>
                   )}
