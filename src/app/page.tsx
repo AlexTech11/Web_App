@@ -1,5 +1,5 @@
 import Link from "next/link";
-import ReviewForm from "@/components/ReviewForm";
+import ShareExperience from "@/components/ShareExperience";
 import { getSupabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -223,8 +223,8 @@ export default async function HomePage() {
           </div>
         )}
 
-        <div style={{ marginTop: reviews.length > 0 ? 50 : 0 }}>
-          <ReviewForm />
+        <div style={{ textAlign: "center", marginTop: reviews.length > 0 ? 40 : 0 }}>
+          <ShareExperience />
         </div>
       </div>
     </>

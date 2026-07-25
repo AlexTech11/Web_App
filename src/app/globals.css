@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0e1c15;
-  --surface: #13241c;
-  --surface2: #1b2c23;
-  --border: rgba(63, 157, 122, 0.12);
+  --bg: #182c22;
+  --surface: #213a2d;
+  --surface2: #2b4838;
+  --border: rgba(127, 201, 166, 0.16);
   --green: #22c55e;
   --red: #ef4444;
   --blue: #3f9d7a;
@@ -39,7 +39,7 @@ h1, h2, h3, h4, h5 { font-family: var(--font-josefin), sans-serif; }
 /* ── TOPBAR ── */
 #topbar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(14, 28, 21, 0.92);
+  background: rgba(24, 44, 34, 0.9);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
@@ -212,7 +212,7 @@ h1.hero-title em { color: #ffffff; font-style: normal; }
 
 /* ── STEPS (How it works) ── */
 .steps-band {
-  background: #122019; padding: 80px 20px;
+  background: #1c3227; padding: 80px 20px;
   border-top: 1px solid rgba(63, 157, 122, 0.1);
   border-bottom: 1px solid rgba(63, 157, 122, 0.1);
 }
@@ -436,7 +436,7 @@ a.listing-title:hover { color: #7fc9a6; }
   color: var(--text); font-family: inherit; font-size: 13px;
   padding: 8px 10px; border-radius: 7px; cursor: pointer; text-decoration: none;
 }
-.share-menu a:hover, .share-menu button:hover { background: rgba(63, 157, 122, 0.12); }
+.share-menu a:hover, .share-menu button:hover { background: rgba(127, 201, 166, 0.16); }
 
 /* ── RESERVE / PAY CTA in modals ── */
 .reserve-cta {
@@ -547,7 +547,7 @@ footer {
   gap: 16px; padding: 28px 32px; max-width: 1200px; margin: 0 auto;
 }
 .metric-card {
-  background: #13241c;
+  background: #213a2d;
   border: 1px solid rgba(63, 157, 122, 0.15);
   border-radius: var(--radius); padding: 24px;
   position: relative; overflow: hidden;
@@ -628,7 +628,7 @@ a.contact-row:hover { border-color: rgba(63, 157, 122, 0.35); transform: transla
   gap: 20px; max-width: 1200px; margin: 0 auto;
 }
 .dash-panel {
-  background: #13241c;
+  background: #213a2d;
   border: 1px solid rgba(63, 157, 122, 0.15);
   border-radius: var(--radius);
 }

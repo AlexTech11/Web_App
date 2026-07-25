@@ -54,6 +54,13 @@ export default async function AdminOverviewPage() {
     count(supabase, "bookings", { status: "requested" }),
   ]);
 
+  const [{ count: pendingReviews }, { data: paidRows }] = await Promise.all([
+    supabase.from("reviews").select("id", { count: "exact", head: true }).eq("approved", false),
+    supabase.from("payments").select("amount_kobo").eq("status", "paid"),
+  ]);
+  const collectedNgn =
+    (paidRows ?? []).reduce((sum, r) => sum + Number(r.amount_kobo), 0) / 100;
+
   const platformMax = Math.max(boltRegs, uberRegs, indriveRegs, 1);
   const listingMax = Math.max(carSale, carRent, houseSale + houseRent, land, 1);
 
@@ -87,6 +94,16 @@ export default async function AdminOverviewPage() {
         <Link href="/admin/bookings" className="metric-card purple">
           <div className="metric-label">Booking Requests</div>
           <div className="metric-val">{requestedBookings}</div>
+        </Link>
+        <Link href="/admin/payments" className="metric-card green">
+          <div className="metric-label">Amount Collected</div>
+          <div className="metric-val" style={{ fontSize: "1.9rem" }}>
+            ₦{collectedNgn.toLocaleString("en-NG")}
+          </div>
+        </Link>
+        <Link href="/admin/reviews?status=pending" className="metric-card amber">
+          <div className="metric-label">Reviews to Approve</div>
+          <div className="metric-val">{pendingReviews ?? 0}</div>
         </Link>
       </div>
 

@@ -15,7 +15,7 @@ const services = [
   "Other",
 ];
 
-export default function ReviewForm() {
+export default function ReviewForm({ embedded = false }: { embedded?: boolean }) {
   const [state, action, pending] = useActionState<ActionResult | null, FormData>(
     submitReview,
     null
@@ -32,10 +32,18 @@ export default function ReviewForm() {
   }
 
   return (
-    <form action={action} className="form-container" style={{ maxWidth: 560 }}>
+    <form
+      action={action}
+      className={embedded ? "" : "form-container"}
+      style={embedded ? undefined : { maxWidth: 560 }}
+    >
       <input type="hidden" name="rating" value={rating} />
-      <div className="form-title" style={{ fontSize: 18 }}>Share your experience</div>
-      <div className="form-subtitle">Tell others how AfroSamboza worked for you.</div>
+      {!embedded && (
+        <>
+          <div className="form-title" style={{ fontSize: 18 }}>Share your experience</div>
+          <div className="form-subtitle">Tell others how AfroSamboza worked for you.</div>
+        </>
+      )}
       <div className="form-grid">
         <div className="field">
           <label htmlFor="rv-name">Your Name</label>
