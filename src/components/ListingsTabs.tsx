@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BookingModal, EnquiryModal } from "@/components/ListingModals";
+import PhotoGallery from "@/components/PhotoGallery";
 import { formatPrice, type Listing } from "@/lib/types";
 import { whatsappLink } from "@/lib/whatsapp";
 
@@ -55,6 +56,7 @@ export default function ListingsTabs({
 }) {
   const [active, setActive] = useState<TabId>(initialTab);
   const [modal, setModal] = useState<{ kind: "enquiry" | "booking"; listing: Listing } | null>(null);
+  const [gallery, setGallery] = useState<{ photos: string[]; title: string } | null>(null);
 
   const visible = listings.filter((l) => tabOf(l) === active);
 
@@ -99,13 +101,21 @@ export default function ListingsTabs({
                           backgroundImage: `url(${photos[0]})`,
                           backgroundSize: "cover",
                           backgroundPosition: "center",
+                          cursor: "pointer",
                         }
                       : undefined
                   }
+                  onClick={
+                    photos.length
+                      ? () => setGallery({ photos, title: l.title })
+                      : undefined
+                  }
+                  role={photos.length ? "button" : undefined}
+                  aria-label={photos.length ? `View ${photos.length} photos` : undefined}
                 >
                   {!photos[0] && ((l.attributes.emoji as string) ?? "🚗")}
                   <div className={`listing-badge ${badge.cls}`}>{badge.label}</div>
-                  {photos.length > 1 && (
+                  {photos.length > 0 && (
                     <div className="listing-photo-count">📷 {photos.length}</div>
                   )}
                 </div>
@@ -150,6 +160,13 @@ export default function ListingsTabs({
       )}
       {modal?.kind === "booking" && (
         <BookingModal listing={modal.listing} onClose={() => setModal(null)} />
+      )}
+      {gallery && (
+        <PhotoGallery
+          photos={gallery.photos}
+          title={gallery.title}
+          onClose={() => setGallery(null)}
+        />
       )}
     </>
   );
