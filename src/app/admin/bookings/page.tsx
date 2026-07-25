@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { setBookingStatus } from "@/app/admin/actions";
+import { deleteBooking, setBookingStatus } from "@/app/admin/actions";
+import AdminSearch from "@/components/AdminSearch";
+import DeleteButton from "@/components/DeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -9,9 +11,9 @@ const filters = ["all", "requested", "confirmed", "completed", "cancelled"] as c
 export default async function AdminBookingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; q?: string }>;
 }) {
-  const { status } = await searchParams;
+  const { status, q } = await searchParams;
   const active = filters.includes(status as (typeof filters)[number])
     ? (status as (typeof filters)[number])
     : "all";
@@ -25,6 +27,7 @@ export default async function AdminBookingsPage({
     .order("created_at", { ascending: false })
     .limit(100);
   if (active !== "all") query = query.eq("status", active);
+  if (q) query = query.or(`name.ilike.%${q}%,phone.ilike.%${q}%,reference_no.ilike.%${q}%,pickup_location.ilike.%${q}%`);
   const { data: bookings } = await query;
 
   return (
@@ -43,6 +46,9 @@ export default async function AdminBookingsPage({
               </Link>
             ))}
           </div>
+        </div>
+        <div style={{ padding: "0 22px" }}>
+          <AdminSearch placeholder="Search name, phone, reference or location…" />
         </div>
         <div className="panel-body">
           {!bookings || bookings.length === 0 ? (
@@ -80,6 +86,11 @@ export default async function AdminBookingsPage({
                         <button className="btn btn-outline btn-sm danger">Cancel</button>
                       </form>
                     )}
+                    <DeleteButton
+                      action={deleteBooking}
+                      id={b.id}
+                      confirmText={`Delete booking ${b.reference_no}? This cannot be undone.`}
+                    />
                   </div>
                 </div>
               );

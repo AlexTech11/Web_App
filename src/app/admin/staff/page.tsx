@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { setUserRole } from "@/app/admin/actions";
+import { deleteUser, setUserRole } from "@/app/admin/actions";
+import AdminSearch from "@/components/AdminSearch";
+import DeleteButton from "@/components/DeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +12,12 @@ const roleClass: Record<string, string> = {
   customer: "status-pending",
 };
 
-export default async function AdminStaffPage() {
+export default async function AdminStaffPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
   const supabase = await createSupabaseServer();
   const {
     data: { user },
@@ -25,11 +32,13 @@ export default async function AdminStaffPage() {
     .single();
   if (me?.role !== "admin") redirect("/admin");
 
-  const { data: profiles } = await supabase
+  let usersQuery = supabase
     .from("profiles")
     .select("id, full_name, email, phone, role, created_at")
     .order("created_at", { ascending: false })
     .limit(200);
+  if (q) usersQuery = usersQuery.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`);
+  const { data: profiles } = await usersQuery;
 
   return (
     <div className="dash-content" style={{ display: "block" }}>
@@ -37,8 +46,11 @@ export default async function AdminStaffPage() {
         <div className="panel-header">
           <div className="panel-title">Staff & Users</div>
           <span style={{ fontSize: 12, color: "var(--muted)" }}>
-            Admin only — promote users to staff or admin
+            Admin only — promote users, or remove accounts
           </span>
+        </div>
+        <div style={{ padding: "0 22px" }}>
+          <AdminSearch placeholder="Search users by name, email or phone…" />
         </div>
         <div className="panel-body">
           {!profiles || profiles.length === 0 ? (
@@ -84,6 +96,12 @@ export default async function AdminStaffPage() {
                           </button>
                         </form>
                       )}
+                      <DeleteButton
+                        action={deleteUser}
+                        id={p.id}
+                        label="Delete User"
+                        confirmText={`Permanently delete ${p.full_name || p.email || "this user"}'s account? This removes their login and cannot be undone.`}
+                      />
                     </div>
                   )}
                 </div>

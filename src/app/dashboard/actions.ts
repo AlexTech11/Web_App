@@ -39,3 +39,27 @@ export async function addRegistrationDocuments(
   revalidatePath("/dashboard");
   return { ok: true };
 }
+
+/** Replace the photo list on one of the caller's own listings (max 10). */
+export async function setListingPhotos(
+  listingId: string,
+  photos: string[]
+): Promise<DocsResult> {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in again." };
+
+  const { error } = await supabase.rpc("set_listing_photos", {
+    p_listing_id: listingId,
+    p_photos: photos.slice(0, 10),
+  });
+  if (error) {
+    console.error("set_listing_photos failed:", error.message);
+    return { ok: false, error: "Could not update photos — please try again." };
+  }
+
+  revalidatePath("/dashboard");
+  return { ok: true };
+}

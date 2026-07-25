@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/types";
 import DashboardDocuments from "@/components/DashboardDocuments";
+import ListingPhotosManager from "@/components/ListingPhotosManager";
 import type { DocRef } from "@/lib/documents";
 
 export const metadata: Metadata = {
@@ -57,7 +58,7 @@ export default async function DashboardPage() {
       .order("created_at", { ascending: false }),
     supabase
       .from("listings")
-      .select("id, reference_no, type, title, price, price_period, location, status, created_at")
+      .select("id, reference_no, type, title, price, price_period, location, status, attributes, created_at")
       .eq("owner_id", user.id)
       .order("created_at", { ascending: false }),
     supabase
@@ -78,7 +79,10 @@ export default async function DashboardPage() {
       <div className="dash-header">
         <div className="dash-title">Welcome, {displayName}</div>
         <div className="dash-sub">
-          Your registrations, listings and bookings — all in one place
+          Your registrations, listings and bookings — all in one place ·{" "}
+          <Link href="/dashboard/profile" style={{ color: "#7fc9a6" }}>
+            Profile &amp; settings
+          </Link>
         </div>
       </div>
 
@@ -166,20 +170,30 @@ export default async function DashboardPage() {
                 </Link>
               </div>
             ) : (
-              listings.map((l) => (
-                <div className="reg-row" key={l.id}>
-                  <div className="reg-avatar">
-                    {l.type.startsWith("car") ? "🚗" : l.type === "land" ? "🌳" : "🏠"}
-                  </div>
-                  <div className="reg-info">
-                    <div className="reg-name">{l.title}</div>
-                    <div className="reg-detail">
-                      {l.location} • {formatPrice(l)} • Ref {l.reference_no}
+              listings.map((l) => {
+                const photos = Array.isArray(
+                  (l.attributes as Record<string, unknown> | null)?.photos
+                )
+                  ? ((l.attributes as { photos: string[] }).photos)
+                  : [];
+                return (
+                  <div key={l.id} className="reg-block">
+                    <div className="reg-row">
+                      <div className="reg-avatar">
+                        {l.type.startsWith("car") ? "🚗" : l.type === "land" ? "🌳" : "🏠"}
+                      </div>
+                      <div className="reg-info">
+                        <div className="reg-name">{l.title}</div>
+                        <div className="reg-detail">
+                          {l.location} • {formatPrice(l)} • Ref {l.reference_no}
+                        </div>
+                      </div>
+                      <StatusPill status={l.status} />
                     </div>
+                    <ListingPhotosManager listingId={l.id} photos={photos} />
                   </div>
-                  <StatusPill status={l.status} />
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

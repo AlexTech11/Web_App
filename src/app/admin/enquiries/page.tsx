@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { setEnquiryStatus } from "@/app/admin/actions";
+import { deleteEnquiry, setEnquiryStatus } from "@/app/admin/actions";
+import AdminSearch from "@/components/AdminSearch";
+import DeleteButton from "@/components/DeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -9,9 +11,9 @@ const filters = ["all", "new", "in_progress", "closed"] as const;
 export default async function AdminEnquiriesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; q?: string }>;
 }) {
-  const { status } = await searchParams;
+  const { status, q } = await searchParams;
   const active = filters.includes(status as (typeof filters)[number])
     ? (status as (typeof filters)[number])
     : "all";
@@ -23,6 +25,7 @@ export default async function AdminEnquiriesPage({
     .order("created_at", { ascending: false })
     .limit(100);
   if (active !== "all") query = query.eq("status", active);
+  if (q) query = query.or(`name.ilike.%${q}%,phone.ilike.%${q}%,email.ilike.%${q}%,message.ilike.%${q}%`);
   const { data: enquiries } = await query;
 
   return (
@@ -41,6 +44,9 @@ export default async function AdminEnquiriesPage({
               </Link>
             ))}
           </div>
+        </div>
+        <div style={{ padding: "0 22px" }}>
+          <AdminSearch placeholder="Search name, phone, email or message…" />
         </div>
         <div className="panel-body">
           {!enquiries || enquiries.length === 0 ? (
@@ -78,6 +84,11 @@ export default async function AdminEnquiriesPage({
                         <button className="btn btn-gold btn-sm">Close</button>
                       </form>
                     )}
+                    <DeleteButton
+                      action={deleteEnquiry}
+                      id={e.id}
+                      confirmText={`Delete this enquiry from ${e.name}? This cannot be undone.`}
+                    />
                   </div>
                 </div>
               );

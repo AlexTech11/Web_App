@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { setListingStatus } from "@/app/admin/actions";
+import { deleteListing, setListingStatus } from "@/app/admin/actions";
 import { formatPrice } from "@/lib/types";
+import AdminSearch from "@/components/AdminSearch";
+import DeleteButton from "@/components/DeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +20,9 @@ const typeIcons: Record<string, string> = {
 export default async function AdminListingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; q?: string }>;
 }) {
-  const { status } = await searchParams;
+  const { status, q } = await searchParams;
   const active = filters.includes(status as (typeof filters)[number])
     ? (status as (typeof filters)[number])
     : "all";
@@ -34,6 +36,10 @@ export default async function AdminListingsPage({
     .order("created_at", { ascending: false })
     .limit(100);
   if (active !== "all") query = query.eq("status", active);
+  if (q)
+    query = query.or(
+      `title.ilike.%${q}%,location.ilike.%${q}%,reference_no.ilike.%${q}%,contact_name.ilike.%${q}%,contact_phone.ilike.%${q}%`
+    );
   const { data: listings } = await query;
 
   return (
@@ -52,6 +58,9 @@ export default async function AdminListingsPage({
               </Link>
             ))}
           </div>
+        </div>
+        <div style={{ padding: "0 22px" }}>
+          <AdminSearch placeholder="Search title, location, ref or contact…" />
         </div>
         <div className="panel-body">
           {!listings || listings.length === 0 ? (
@@ -99,6 +108,11 @@ export default async function AdminListingsPage({
                       <button className="btn btn-outline btn-sm danger">Reject</button>
                     </form>
                   )}
+                  <DeleteButton
+                    action={deleteListing}
+                    id={l.id}
+                    confirmText={`Delete listing "${l.title}" (${l.reference_no})? This cannot be undone.`}
+                  />
                 </div>
               </div>
             ))

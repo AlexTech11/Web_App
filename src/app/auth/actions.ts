@@ -137,6 +137,46 @@ export async function updatePassword(
   redirect("/dashboard");
 }
 
+const profileSchema = z.object({
+  full_name: z.string().trim().min(3, "Full name is required"),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^(\+?234|0)[789][01]\d{8}$/, "Enter a valid Nigerian phone number")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+});
+
+/** Update the signed-in user's own profile details. */
+export async function updateProfileDetails(
+  _prev: AuthResult | null,
+  formData: FormData
+): Promise<AuthResult> {
+  const parsed = profileSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success)
+    return { ok: false, error: parsed.error.issues[0].message };
+
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in again." };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: parsed.data.full_name,
+      phone: parsed.data.phone ?? null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+  if (error) return { ok: false, error: "Could not save your details." };
+
+  revalidatePath("/", "layout");
+  revalidatePath("/dashboard/profile");
+  return { ok: true, message: "Profile updated." };
+}
+
 export async function signOut(): Promise<void> {
   const supabase = await createSupabaseServer();
   await supabase.auth.signOut();

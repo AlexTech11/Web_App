@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { setRegistrationStatus } from "@/app/admin/actions";
+import { deleteRegistration, setRegistrationStatus } from "@/app/admin/actions";
 import { REGISTRATION_DOCS, DOC_LABELS, type DocRef } from "@/lib/documents";
+import AdminSearch from "@/components/AdminSearch";
+import DeleteButton from "@/components/DeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +18,9 @@ const platformNames: Record<string, string> = {
 export default async function AdminRegistrationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; q?: string }>;
 }) {
-  const { status } = await searchParams;
+  const { status, q } = await searchParams;
   const active = filters.includes(status as (typeof filters)[number])
     ? (status as (typeof filters)[number])
     : "all";
@@ -32,6 +34,10 @@ export default async function AdminRegistrationsPage({
     .order("created_at", { ascending: false })
     .limit(100);
   if (active !== "all") query = query.eq("status", active);
+  if (q)
+    query = query.or(
+      `full_name.ilike.%${q}%,phone.ilike.%${q}%,email.ilike.%${q}%,reference_no.ilike.%${q}%,plate_number.ilike.%${q}%,vehicle_make.ilike.%${q}%,vehicle_model.ilike.%${q}%`
+    );
   const { data: regs } = await query;
 
   // Signed URLs (1 h) for uploaded documents, keyed by registration + doc type.
@@ -65,6 +71,9 @@ export default async function AdminRegistrationsPage({
               </Link>
             ))}
           </div>
+        </div>
+        <div style={{ padding: "0 22px" }}>
+          <AdminSearch placeholder="Search name, phone, email, ref, plate or vehicle…" />
         </div>
         <div className="panel-body">
           {!regs || regs.length === 0 ? (
@@ -142,6 +151,11 @@ export default async function AdminRegistrationsPage({
                       <button className="btn btn-outline btn-sm danger">Reject</button>
                     </form>
                   )}
+                  <DeleteButton
+                    action={deleteRegistration}
+                    id={r.id}
+                    confirmText={`Delete ${r.full_name}'s registration (${r.reference_no})? This cannot be undone.`}
+                  />
                 </div>
               </div>
               );

@@ -625,6 +625,36 @@ a.contact-row:hover { border-color: rgba(63, 157, 122, 0.35); transform: transla
 }
 .admin-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .admin-actions form { display: inline; }
+.admin-search { display: flex; gap: 8px; margin: 16px 0 4px; }
+.admin-search input { flex: 1; }
+.profile-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  max-width: 960px; margin: 0 auto; align-items: start;
+}
+@media (max-width: 768px) { .profile-grid { grid-template-columns: 1fr; } }
+
+/* ── LISTING PHOTO MANAGER (dashboard) ── */
+.listing-photos-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.listing-photo-thumb {
+  position: relative; width: 84px; height: 64px; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.listing-photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.listing-photo-remove {
+  position: absolute; top: 3px; right: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(5, 8, 16, 0.8); color: #f87171; border: none; cursor: pointer;
+  font-size: 12px; line-height: 1; display: flex; align-items: center; justify-content: center;
+}
+.listing-photo-remove:hover { background: #ef4444; color: #fff; }
+.listing-photo-add {
+  width: 84px; height: 64px; border-radius: 8px;
+  border: 1px dashed rgba(63, 157, 122, 0.4); color: var(--muted);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; gap: 2px; transition: var(--transition);
+}
+.listing-photo-add span:first-child { font-size: 20px; line-height: 1; }
+.listing-photo-add:hover { border-color: #3f9d7a; color: #7fc9a6; }
 .btn-sm.danger { border-color: rgba(239, 68, 68, 0.35); color: #f87171; }
 .btn-sm.danger:hover { border-color: #ef4444; background: rgba(239, 68, 68, 0.08); color: #f87171; }
 .bar-chart { display: flex; flex-direction: column; gap: 16px; }

@@ -107,3 +107,63 @@ export async function setUserRole(userId: string, role: string): Promise<void> {
 
   revalidatePath("/admin/staff");
 }
+
+/** Admin-only: delete a row. RLS delete policies require is_admin(). */
+async function deleteRow(table: Table, id: string): Promise<void> {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { error } = await supabase.from(table).delete().eq("id", id);
+  if (error) {
+    console.error(`${table} delete failed:`, error.message);
+    return;
+  }
+  await supabase.from("staff_activity").insert({
+    staff_id: user.id,
+    action: "delete",
+    entity_type: table,
+    entity_id: id,
+  });
+  revalidatePath(pathOf[table]);
+  revalidatePath("/admin");
+}
+
+export async function deleteRegistration(id: string): Promise<void> {
+  await deleteRow("driver_registrations", id);
+}
+export async function deleteListing(id: string): Promise<void> {
+  await deleteRow("listings", id);
+}
+export async function deleteEnquiry(id: string): Promise<void> {
+  await deleteRow("enquiries", id);
+}
+export async function deleteBooking(id: string): Promise<void> {
+  await deleteRow("bookings", id);
+}
+
+/** Admin-only: delete a user account (auth user + cascade). */
+export async function deleteUser(userId: string): Promise<void> {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || user.id === userId) return;
+
+  const { error } = await supabase.rpc("admin_delete_user", {
+    p_user_id: userId,
+  });
+  if (error) {
+    console.error("delete user failed:", error.message);
+    return;
+  }
+  await supabase.from("staff_activity").insert({
+    staff_id: user.id,
+    action: "delete_user",
+    entity_type: "profiles",
+    entity_id: userId,
+  });
+  revalidatePath("/admin/staff");
+}
