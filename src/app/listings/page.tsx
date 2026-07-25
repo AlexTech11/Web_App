@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import ListingsTabs from "@/components/ListingsTabs";
 import { getSupabase } from "@/lib/supabase";
+import { paymentsEnabled } from "@/lib/paystack";
+import { getFee } from "@/lib/settings";
 import type { Listing } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -38,7 +40,10 @@ export default async function ListingsPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab } = await searchParams;
-  const listings = await getLiveListings();
+  const [listings, reservationFee] = await Promise.all([
+    getLiveListings(),
+    getFee("listing_reservation"),
+  ]);
   const initialTab =
     tab === "cars-rent" || tab === "properties" ? tab : "cars-sale";
 
@@ -51,7 +56,12 @@ export default async function ListingsPage({
           Browse verified listings across Nigeria. Updated daily.
         </p>
       </div>
-      <ListingsTabs listings={listings} initialTab={initialTab} />
+      <ListingsTabs
+        listings={listings}
+        initialTab={initialTab}
+        paymentsEnabled={paymentsEnabled()}
+        reservationFee={reservationFee}
+      />
     </div>
   );
 }

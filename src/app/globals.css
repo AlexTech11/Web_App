@@ -627,6 +627,17 @@ a.contact-row:hover { border-color: rgba(63, 157, 122, 0.35); transform: transla
 .admin-actions form { display: inline; }
 .admin-search { display: flex; gap: 8px; margin: 16px 0 4px; }
 .admin-search input { flex: 1; }
+.pay-email { display: inline-flex; gap: 6px; align-items: center; }
+.pay-email input { padding: 7px 10px; font-size: 13px; width: 160px; }
+.pay-error { color: #f87171; font-size: 12px; margin-left: 6px; }
+.fee-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface);
+}
+.fee-input { display: flex; align-items: center; gap: 8px; }
+.fee-input span { color: var(--muted); }
+.fee-input input { width: 110px; }
 .profile-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
   max-width: 960px; margin: 0 auto; align-items: start;

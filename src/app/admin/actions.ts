@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { FEE_KEY } from "@/lib/settings";
+import type { PaymentPurpose } from "@/lib/paystack";
 
 /**
  * Staff-only status transitions. RLS is the real gate (update policies
@@ -142,6 +144,29 @@ export async function deleteEnquiry(id: string): Promise<void> {
 }
 export async function deleteBooking(id: string): Promise<void> {
   await deleteRow("bookings", id);
+}
+
+/** Admin-only: set a service fee (Naira). RLS requires is_admin() to write. */
+export async function setServiceFee(
+  purpose: PaymentPurpose,
+  amountNgn: number
+): Promise<void> {
+  if (!Number.isFinite(amountNgn) || amountNgn < 0) return;
+
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { error } = await supabase
+    .from("settings")
+    .upsert({ key: FEE_KEY[purpose], value: Math.round(amountNgn), updated_at: new Date().toISOString() });
+  if (error) {
+    console.error("fee update failed:", error.message);
+    return;
+  }
+  revalidatePath("/admin/settings");
 }
 
 /** Admin-only: delete a user account (auth user + cascade). */

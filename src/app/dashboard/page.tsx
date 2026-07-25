@@ -5,6 +5,9 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/types";
 import DashboardDocuments from "@/components/DashboardDocuments";
 import ListingPhotosManager from "@/components/ListingPhotosManager";
+import PayButton from "@/components/PayButton";
+import { paymentsEnabled } from "@/lib/paystack";
+import { getFee } from "@/lib/settings";
 import type { DocRef } from "@/lib/documents";
 
 export const metadata: Metadata = {
@@ -53,7 +56,7 @@ export default async function DashboardPage() {
     supabase.from("profiles").select("full_name, phone, email, role").eq("id", user.id).single(),
     supabase
       .from("driver_registrations")
-      .select("id, reference_no, platform, vehicle_make, vehicle_model, vehicle_year, status, documents, created_at")
+      .select("id, reference_no, platform, vehicle_make, vehicle_model, vehicle_year, status, documents, paid, created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
     supabase
@@ -73,6 +76,10 @@ export default async function DashboardPage() {
   const listings = listingsRes.data ?? [];
   const bookings = bookingsRes.data ?? [];
   const displayName = profile?.full_name || user.email || "there";
+
+  const payEnabled = paymentsEnabled();
+  const activationFee = payEnabled ? await getFee("ride_activation") : 0;
+  const payerEmail = profile?.email || user.email || "";
 
   return (
     <>
@@ -143,6 +150,21 @@ export default async function DashboardPage() {
                       </div>
                     </div>
                     <StatusPill status={r.status} />
+                    {r.paid ? (
+                      <span className="reg-status status-approved">Paid ✓</span>
+                    ) : (
+                      payEnabled &&
+                      activationFee > 0 && (
+                        <PayButton
+                          purpose="ride_activation"
+                          entityType="driver_registrations"
+                          entityId={r.id}
+                          amountNgn={activationFee}
+                          defaultEmail={payerEmail}
+                          label={`Activate — Pay ₦${activationFee.toLocaleString("en-NG")}`}
+                        />
+                      )
+                    )}
                   </div>
                   <DashboardDocuments
                     registrationId={r.id}

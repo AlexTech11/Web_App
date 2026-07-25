@@ -1,53 +1,79 @@
+import crypto from "crypto";
 import { flags } from "@/lib/flags";
 
 /**
- * Paystack payments for featured listings — PLACEHOLDER.
+ * Paystack payments. Inert until NEXT_PUBLIC_PAYSTACK_ENABLED=true AND the
+ * PAYSTACK_SECRET_KEY / SUPABASE_SERVICE_ROLE_KEY env vars are set.
  *
- * Disabled by default. When NEXT_PUBLIC_PAYSTACK_ENABLED=true, this initialises
- * a transaction and returns a checkout URL to redirect the seller to. A webhook
- * route (/api/paystack/webhook) then marks the listing featured on success.
- *
- * Setup when ready:
- *   1. Paystack dashboard → API keys: NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
- *      PAYSTACK_SECRET_KEY.
- *   2. Add a `featured boolean` / `featured_until timestamptz` column to listings.
- *   3. Uncomment the block below and add the webhook route.
+ * Fees are configurable via env (Naira); amounts are sent to Paystack in kobo.
  */
-export const FEATURED_LISTING_FEE_NGN = 5000;
+export type PaymentPurpose =
+  | "ride_activation"
+  | "listing_reservation"
+  | "rental_booking";
 
-export interface CheckoutInit {
-  ok: boolean;
-  checkoutUrl?: string;
-  reason?: string;
+export const PAYMENT_FEES_NGN: Record<PaymentPurpose, number> = {
+  ride_activation: Number(process.env.PAYSTACK_ACTIVATION_FEE_NGN ?? 5000),
+  listing_reservation: Number(process.env.PAYSTACK_RESERVATION_FEE_NGN ?? 5000),
+  rental_booking: Number(process.env.PAYSTACK_RENTAL_FEE_NGN ?? 5000),
+};
+
+export function paymentsEnabled(): boolean {
+  return flags.paystack && !!process.env.PAYSTACK_SECRET_KEY;
 }
 
-export async function initFeaturedListingPayment(
-  _listingId: string,
-  _email: string
-): Promise<CheckoutInit> {
-  if (!flags.paystack) {
-    return { ok: false, reason: "Payments are not enabled yet." };
+function secret(): string {
+  return process.env.PAYSTACK_SECRET_KEY!;
+}
+
+export async function paystackInitialize(params: {
+  email: string;
+  amountKobo: number;
+  reference: string;
+  metadata: Record<string, unknown>;
+  callbackUrl: string;
+}): Promise<{ ok: true; authorizationUrl: string } | { ok: false; reason: string }> {
+  const res = await fetch("https://api.paystack.co/transaction/initialize", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${secret()}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: params.email,
+      amount: params.amountKobo,
+      reference: params.reference,
+      metadata: params.metadata,
+      callback_url: params.callbackUrl,
+    }),
+  });
+  const data = await res.json();
+  if (!data.status) {
+    return { ok: false, reason: data.message ?? "Could not start payment." };
   }
+  return { ok: true, authorizationUrl: data.data.authorization_url as string };
+}
 
-  // --- Uncomment when Paystack is enabled ---
-  // const res = await fetch("https://api.paystack.co/transaction/initialize", {
-  //   method: "POST",
-  //   headers: {
-  //     Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-  //     "Content-Type": "application/json",
-  //   },
-  //   body: JSON.stringify({
-  //     email: _email,
-  //     amount: FEATURED_LISTING_FEE_NGN * 100, // kobo
-  //     metadata: { listing_id: _listingId, purpose: "featured_listing" },
-  //     callback_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
-  //   }),
-  // });
-  // const data = await res.json();
-  // return data.status
-  //   ? { ok: true, checkoutUrl: data.data.authorization_url }
-  //   : { ok: false, reason: data.message };
-  // ------------------------------------------
+export async function paystackVerify(
+  reference: string
+): Promise<{ paid: boolean }> {
+  const res = await fetch(
+    `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+    { headers: { Authorization: `Bearer ${secret()}` } }
+  );
+  const data = await res.json();
+  return { paid: !!data.status && data.data?.status === "success" };
+}
 
-  return { ok: false, reason: "Payments are not enabled yet." };
+/** Verify a Paystack webhook signature (HMAC-SHA512 of the raw body). */
+export function verifyPaystackSignature(
+  rawBody: string,
+  signature: string | null
+): boolean {
+  if (!signature || !process.env.PAYSTACK_SECRET_KEY) return false;
+  const hash = crypto
+    .createHmac("sha512", secret())
+    .update(rawBody)
+    .digest("hex");
+  return hash === signature;
 }

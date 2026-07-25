@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BookingModal, EnquiryModal } from "@/components/ListingModals";
 import PhotoGallery from "@/components/PhotoGallery";
+import PayButton from "@/components/PayButton";
 import { formatPrice, type Listing } from "@/lib/types";
 import { whatsappLink } from "@/lib/whatsapp";
 
@@ -50,9 +51,13 @@ function metaOf(listing: Listing): string[] {
 export default function ListingsTabs({
   listings,
   initialTab = "cars-sale",
+  paymentsEnabled = false,
+  reservationFee = 0,
 }: {
   listings: Listing[];
   initialTab?: TabId;
+  paymentsEnabled?: boolean;
+  reservationFee?: number;
 }) {
   const [active, setActive] = useState<TabId>(initialTab);
   const [modal, setModal] = useState<{ kind: "enquiry" | "booking"; listing: Listing } | null>(null);
@@ -148,6 +153,15 @@ export default function ListingsTabs({
                   >
                     WhatsApp
                   </a>
+                  {paymentsEnabled && reservationFee > 0 && (
+                    <PayButton
+                      purpose="listing_reservation"
+                      entityType="listings"
+                      entityId={l.id}
+                      amountNgn={reservationFee}
+                      label={`Reserve ₦${reservationFee.toLocaleString("en-NG")}`}
+                    />
+                  )}
                 </div>
               </div>
             );
