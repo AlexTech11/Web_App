@@ -175,13 +175,15 @@ export async function submitBooking(
   } = await supabase.auth.getUser();
 
   const reference = makeReference("BK");
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("bookings")
-    .insert({ ...parsed.data, reference_no: reference, customer_id: user?.id ?? null });
+    .insert({ ...parsed.data, reference_no: reference, customer_id: user?.id ?? null })
+    .select("id")
+    .single();
 
   if (error) {
     console.error("bookings insert failed:", error.message);
     return { ok: false, error: "Could not request this booking — please try again shortly." };
   }
-  return { ok: true, reference };
+  return { ok: true, reference, id: data?.id };
 }

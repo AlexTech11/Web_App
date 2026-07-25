@@ -1,21 +1,28 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { submitBooking, submitEnquiry } from "@/app/actions";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import PayButton from "@/components/PayButton";
 import type { ActionResult, Listing } from "@/lib/types";
 
 export function EnquiryModal({
   listing,
   onClose,
+  paymentsEnabled = false,
+  reservationFee = 0,
 }: {
   listing: Listing;
   onClose: () => void;
+  paymentsEnabled?: boolean;
+  reservationFee?: number;
 }) {
   const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(
     submitEnquiry,
     null
   );
+  const [email, setEmail] = useState("");
+  const canReserve = paymentsEnabled && reservationFee > 0;
 
   return (
     <div
@@ -24,16 +31,43 @@ export function EnquiryModal({
     >
       <div className="modal">
         <div className="modal-header">
-          <h3>Send Enquiry — {listing.title}</h3>
+          <h3>Enquire — {listing.title}</h3>
           <button className="modal-close" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>
         {state?.ok ? (
-          <div className="success-msg">
-            ✅ <strong>Enquiry sent!</strong> Our team will get back to you
-            within 24 hours.
-          </div>
+          <>
+            <div className="success-msg">
+              ✅ <strong>Enquiry sent!</strong> Our team will get back to you
+              within 24 hours.
+            </div>
+            {canReserve && (
+              <div className="reserve-cta">
+                <div className="reserve-cta-title">
+                  Want to hold this {listing.type === "land" ? "land" : "item"}?
+                </div>
+                <p>
+                  Pay a refundable reservation / inspection fee of{" "}
+                  <strong>₦{reservationFee.toLocaleString("en-NG")}</strong> to
+                  reserve it and unlock priority viewing.
+                </p>
+                <PayButton
+                  purpose="listing_reservation"
+                  entityType="listings"
+                  entityId={listing.id}
+                  amountNgn={reservationFee}
+                  defaultEmail={email || undefined}
+                  label={`Reserve — Pay ₦${reservationFee.toLocaleString("en-NG")}`}
+                />
+              </div>
+            )}
+            <div className="form-actions" style={{ marginTop: 16 }}>
+              <button className="btn btn-outline" style={{ padding: "13px 20px", borderRadius: 10 }} onClick={onClose}>
+                Close
+              </button>
+            </div>
+          </>
         ) : (
           <form action={formAction}>
             <input type="hidden" name="listing_id" value={listing.id} />
@@ -47,8 +81,15 @@ export function EnquiryModal({
                 <input id="enq-phone" name="phone" type="tel" placeholder="08012345678" required />
               </div>
               <div className="field">
-                <label htmlFor="enq-email">Email</label>
-                <input id="enq-email" name="email" type="email" placeholder="you@email.com" />
+                <label htmlFor="enq-email">Email {canReserve ? "(needed to reserve)" : ""}</label>
+                <input
+                  id="enq-email"
+                  name="email"
+                  type="email"
+                  placeholder="you@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
               <div className="field">
                 <label htmlFor="enq-message">Message</label>
@@ -85,14 +126,20 @@ export function EnquiryModal({
 export function BookingModal({
   listing,
   onClose,
+  paymentsEnabled = false,
+  rentalFee = 0,
 }: {
   listing: Listing;
   onClose: () => void;
+  paymentsEnabled?: boolean;
+  rentalFee?: number;
 }) {
   const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(
     submitBooking,
     null
   );
+  const [email, setEmail] = useState("");
+  const canPay = paymentsEnabled && rentalFee > 0;
 
   return (
     <div
@@ -107,11 +154,39 @@ export function BookingModal({
           </button>
         </div>
         {state?.ok ? (
-          <div className="success-msg">
-            ✅ <strong>Booking requested!</strong> Reference:{" "}
-            <strong>{state.reference}</strong>. We&apos;ll confirm availability
-            shortly.
-          </div>
+          <>
+            <div className="success-msg">
+              ✅ <strong>Booking requested!</strong> Reference:{" "}
+              <strong>{state.reference}</strong>.
+            </div>
+            {canPay && state.id ? (
+              <div className="reserve-cta">
+                <div className="reserve-cta-title">Confirm your booking</div>
+                <p>
+                  Pay the booking fee of{" "}
+                  <strong>₦{rentalFee.toLocaleString("en-NG")}</strong> to lock in
+                  these dates.
+                </p>
+                <PayButton
+                  purpose="rental_booking"
+                  entityType="bookings"
+                  entityId={state.id}
+                  amountNgn={rentalFee}
+                  defaultEmail={email || undefined}
+                  label={`Pay ₦${rentalFee.toLocaleString("en-NG")} to Confirm`}
+                />
+              </div>
+            ) : (
+              <p className="section-sub" style={{ marginTop: 12 }}>
+                We&apos;ll confirm availability shortly.
+              </p>
+            )}
+            <div className="form-actions" style={{ marginTop: 16 }}>
+              <button className="btn btn-outline" style={{ padding: "13px 20px", borderRadius: 10 }} onClick={onClose}>
+                Close
+              </button>
+            </div>
+          </>
         ) : (
           <form action={formAction}>
             <input type="hidden" name="listing_id" value={listing.id} />
@@ -133,15 +208,32 @@ export function BookingModal({
                 <input id="bk-return" name="return_date" type="date" required />
               </div>
               <div className="field span2">
+                <label htmlFor="bk-email">Email {canPay ? "(needed to pay)" : "(optional)"}</label>
+                <input
+                  id="bk-email"
+                  name="email"
+                  type="email"
+                  placeholder="you@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="field span2">
                 <label htmlFor="bk-location">Pickup Location</label>
                 <input id="bk-location" name="pickup_location" type="text" placeholder="Address or landmark" />
               </div>
               <TurnstileWidget />
             </div>
+            {canPay && (
+              <p className="section-sub" style={{ margin: "0 0 4px" }}>
+                A booking fee of ₦{rentalFee.toLocaleString("en-NG")} applies after
+                you submit.
+              </p>
+            )}
             {state && !state.ok && <div className="error-msg">⚠️ {state.error}</div>}
             <div className="form-actions">
               <button type="submit" className="btn-primary" disabled={pending}>
-                {pending ? "Requesting..." : "Confirm Booking"}
+                {pending ? "Requesting..." : "Request Booking"}
               </button>
               <button
                 type="button"

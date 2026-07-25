@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { BookingModal, EnquiryModal } from "@/components/ListingModals";
 import PhotoGallery from "@/components/PhotoGallery";
-import PayButton from "@/components/PayButton";
+import ShareButton from "@/components/ShareButton";
 import { formatPrice, type Listing } from "@/lib/types";
 import { whatsappLink } from "@/lib/whatsapp";
 
@@ -53,11 +53,13 @@ export default function ListingsTabs({
   initialTab = "cars-sale",
   paymentsEnabled = false,
   reservationFee = 0,
+  rentalFee = 0,
 }: {
   listings: Listing[];
   initialTab?: TabId;
   paymentsEnabled?: boolean;
   reservationFee?: number;
+  rentalFee?: number;
 }) {
   const [active, setActive] = useState<TabId>(initialTab);
   const [modal, setModal] = useState<{ kind: "enquiry" | "booking"; listing: Listing } | null>(null);
@@ -153,15 +155,11 @@ export default function ListingsTabs({
                   >
                     WhatsApp
                   </a>
-                  {paymentsEnabled && reservationFee > 0 && (
-                    <PayButton
-                      purpose="listing_reservation"
-                      entityType="listings"
-                      entityId={l.id}
-                      amountNgn={reservationFee}
-                      label={`Reserve ₦${reservationFee.toLocaleString("en-NG")}`}
-                    />
-                  )}
+                  <ShareButton
+                    title={l.title}
+                    subtitle={`${formatPrice(l)} · ${l.location}`}
+                    listingId={l.id}
+                  />
                 </div>
               </div>
             );
@@ -170,10 +168,20 @@ export default function ListingsTabs({
       )}
 
       {modal?.kind === "enquiry" && (
-        <EnquiryModal listing={modal.listing} onClose={() => setModal(null)} />
+        <EnquiryModal
+          listing={modal.listing}
+          onClose={() => setModal(null)}
+          paymentsEnabled={paymentsEnabled}
+          reservationFee={reservationFee}
+        />
       )}
       {modal?.kind === "booking" && (
-        <BookingModal listing={modal.listing} onClose={() => setModal(null)} />
+        <BookingModal
+          listing={modal.listing}
+          onClose={() => setModal(null)}
+          paymentsEnabled={paymentsEnabled}
+          rentalFee={rentalFee}
+        />
       )}
       {gallery && (
         <PhotoGallery

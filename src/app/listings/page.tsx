@@ -40,9 +40,10 @@ export default async function ListingsPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab } = await searchParams;
-  const [listings, reservationFee] = await Promise.all([
+  const [listings, reservationFee, rentalFee] = await Promise.all([
     getLiveListings(),
     getFee("listing_reservation"),
+    getFee("rental_booking"),
   ]);
   const initialTab =
     tab === "cars-rent" || tab === "properties" ? tab : "cars-sale";
@@ -61,6 +62,7 @@ export default async function ListingsPage({
         initialTab={initialTab}
         paymentsEnabled={paymentsEnabled()}
         reservationFee={reservationFee}
+        rentalFee={rentalFee}
       />
     </div>
   );

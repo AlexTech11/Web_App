@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { FEE_KEY } from "@/lib/settings";
+import { listingInterestSchema } from "@/lib/validation";
+import type { ActionResult } from "@/lib/types";
 import type { PaymentPurpose } from "@/lib/paystack";
 
 /**
@@ -108,6 +110,59 @@ export async function setUserRole(userId: string, role: string): Promise<void> {
   });
 
   revalidatePath("/admin/staff");
+}
+
+/** Staff/admin: create a listing that goes live immediately. */
+export async function createAdminListing(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in again." };
+
+  const raw = Object.fromEntries(formData.entries());
+  const attributes: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (key.startsWith("attr_") && value !== "") attributes[key.slice(5)] = value;
+  }
+  if (typeof raw.photos === "string" && raw.photos) {
+    try {
+      const photos = JSON.parse(raw.photos);
+      if (Array.isArray(photos) && photos.length > 0) {
+        attributes.photos = photos.slice(0, 10);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const parsed = listingInterestSchema.safeParse({ ...raw, attributes });
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Check the form." };
+  }
+
+  const reference = `AS-${Date.now().toString(36).toUpperCase().slice(-5)}${Math.random()
+    .toString(36)
+    .toUpperCase()
+    .slice(2, 5)}`;
+
+  const { error } = await supabase.from("listings").insert({
+    ...parsed.data,
+    reference_no: reference,
+    status: "live",
+    approved_by: user.id,
+  });
+  if (error) {
+    console.error("admin listing create failed:", error.message);
+    return { ok: false, error: "Could not create listing — check your inputs." };
+  }
+
+  revalidatePath("/admin/listings");
+  revalidatePath("/listings");
+  return { ok: true, reference };
 }
 
 /** Admin-only: delete a row. RLS delete policies require is_admin(). */

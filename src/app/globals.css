@@ -365,7 +365,34 @@ textarea { resize: vertical; min-height: 100px; }
 .listing-price { font-family: var(--font-josefin), sans-serif; font-size: 18px; font-weight: 800; color: #7fc9a6; }
 .listing-meta { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
 .listing-meta span { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
-.listing-actions { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+.listing-actions { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ── SHARE MENU ── */
+.share-wrap { position: relative; display: inline-block; }
+.share-menu {
+  position: absolute; bottom: calc(100% + 6px); right: 0; z-index: 20;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 6px; min-width: 160px;
+  display: flex; flex-direction: column; gap: 2px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.share-menu a, .share-menu button {
+  display: block; text-align: left; background: none; border: none;
+  color: var(--text); font-family: inherit; font-size: 13px;
+  padding: 8px 10px; border-radius: 7px; cursor: pointer; text-decoration: none;
+}
+.share-menu a:hover, .share-menu button:hover { background: rgba(63, 157, 122, 0.12); }
+
+/* ── RESERVE / PAY CTA in modals ── */
+.reserve-cta {
+  margin-top: 16px; padding: 16px; border-radius: 12px;
+  background: rgba(63, 157, 122, 0.08); border: 1px solid rgba(63, 157, 122, 0.25);
+}
+.reserve-cta-title { font-weight: 700; margin-bottom: 6px; }
+.reserve-cta p { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.pay-email { display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pay-email input { width: 200px; }
+.pay-error { color: #f87171; font-size: 12px; display: block; margin-top: 6px; }
 .empty-state {
   text-align: center; padding: 60px 20px; color: var(--muted);
   border: 1px dashed var(--border); border-radius: var(--radius);

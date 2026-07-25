@@ -24,6 +24,7 @@ export interface Listing {
 export interface ActionResult {
   ok: boolean;
   reference?: string;
+  id?: string;
   error?: string;
 }
 

@@ -47,6 +47,9 @@ export default async function AdminListingsPage({
       <div className="dash-panel full">
         <div className="panel-header">
           <div className="panel-title">Listings</div>
+          <Link href="/admin/listings/new" className="btn btn-gold btn-sm">
+            + Add Listing
+          </Link>
           <div className="admin-filters">
             {filters.map((f) => (
               <Link
