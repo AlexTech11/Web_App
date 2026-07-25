@@ -156,6 +156,33 @@ export async function submitEnquiry(
   return { ok: true };
 }
 
+const reviewSchema = z.object({
+  name: z.string().trim().min(2, "Your name is required"),
+  location: z.string().trim().max(80).optional().transform((v) => v || null),
+  service: z.string().trim().max(60).optional().transform((v) => v || null),
+  rating: z.coerce.number().int().min(1).max(5).default(5),
+  message: z.string().trim().min(5, "Please share a little more").max(1000),
+});
+
+export async function submitReview(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  const blocked = await guardSubmission(formData);
+  if (blocked) return blocked;
+
+  const parsed = reviewSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) return { ok: false, error: firstError(parsed.error) };
+
+  const supabase = await createSupabaseServer();
+  const { error } = await supabase.from("reviews").insert(parsed.data);
+  if (error) {
+    console.error("reviews insert failed:", error.message);
+    return { ok: false, error: "Could not submit your review — please try again." };
+  }
+  return { ok: true };
+}
+
 export async function submitBooking(
   _prev: ActionResult | null,
   formData: FormData

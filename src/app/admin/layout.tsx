@@ -14,6 +14,8 @@ const baseLinks = [
   { href: "/admin/listings", label: "Listings" },
   { href: "/admin/enquiries", label: "Enquiries" },
   { href: "/admin/bookings", label: "Bookings" },
+  { href: "/admin/payments", label: "Payments" },
+  { href: "/admin/reviews", label: "Reviews" },
 ];
 
 export default async function AdminLayout({

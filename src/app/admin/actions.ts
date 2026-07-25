@@ -224,6 +224,41 @@ export async function setServiceFee(
   revalidatePath("/admin/settings");
 }
 
+/** Staff: approve a review so it appears publicly. */
+export async function approveReview(id: string): Promise<void> {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  const { error } = await supabase
+    .from("reviews")
+    .update({ approved: true })
+    .eq("id", id);
+  if (error) {
+    console.error("review approve failed:", error.message);
+    return;
+  }
+  revalidatePath("/admin/reviews");
+  revalidatePath("/");
+}
+
+/** Admin: delete a review. */
+export async function deleteReview(id: string): Promise<void> {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  const { error } = await supabase.from("reviews").delete().eq("id", id);
+  if (error) {
+    console.error("review delete failed:", error.message);
+    return;
+  }
+  revalidatePath("/admin/reviews");
+  revalidatePath("/");
+}
+
 /** Admin-only: delete a user account (auth user + cascade). */
 export async function deleteUser(userId: string): Promise<void> {
   const supabase = await createSupabaseServer();

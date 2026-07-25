@@ -127,7 +127,9 @@ export default function ListingsTabs({
                   )}
                 </div>
                 <div className="listing-body">
-                  <div className="listing-title">{l.title}</div>
+                  <a className="listing-title" href={`/listings/${l.id}`}>
+                    {l.title}
+                  </a>
                   <div className="listing-sub">📍 {l.location}</div>
                   <div className="listing-price">{formatPrice(l)}</div>
                   <div className="listing-meta">

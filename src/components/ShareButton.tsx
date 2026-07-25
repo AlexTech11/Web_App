@@ -18,7 +18,7 @@ export default function ShareButton({
     typeof window !== "undefined"
       ? window.location.origin
       : "https://afrosamboza.com.ng";
-  const url = `${origin}/listings?item=${listingId}`;
+  const url = `${origin}/listings/${listingId}`;
   const text = `Check out ${title} — ${subtitle} on AfroSamboza`;
   const full = `${text} ${url}`;
 

@@ -54,7 +54,10 @@ const platforms = [
       "Fast approval process",
       "Multiple service categories",
     ],
-    portal: { href: "#regForm", label: "🟢 Fill Registration Form →" },
+    portal: {
+      href: "https://indriver.onelink.me/X6vF/weaczkx1",
+      label: "🟢 Open inDrive Partner Portal →",
+    },
   },
 ];
 

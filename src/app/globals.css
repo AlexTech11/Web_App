@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #061009;
-  --surface: #0b1712;
-  --surface2: #121e18;
+  --bg: #0e1c15;
+  --surface: #13241c;
+  --surface2: #1b2c23;
   --border: rgba(63, 157, 122, 0.12);
   --green: #22c55e;
   --red: #ef4444;
@@ -39,7 +39,7 @@ h1, h2, h3, h4, h5 { font-family: var(--font-josefin), sans-serif; }
 /* ── TOPBAR ── */
 #topbar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(6, 16, 9, 0.95);
+  background: rgba(14, 28, 21, 0.92);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
@@ -212,7 +212,7 @@ h1.hero-title em { color: #ffffff; font-style: normal; }
 
 /* ── STEPS (How it works) ── */
 .steps-band {
-  background: #081410; padding: 80px 20px;
+  background: #122019; padding: 80px 20px;
   border-top: 1px solid rgba(63, 157, 122, 0.1);
   border-bottom: 1px solid rgba(63, 157, 122, 0.1);
 }
@@ -367,6 +367,61 @@ textarea { resize: vertical; min-height: 100px; }
 .listing-meta span { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
 .listing-actions { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-wrap: wrap; }
 
+/* ── TESTIMONIALS ── */
+.testimonials-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;
+}
+.testimonial-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+}
+.testimonial-stars { color: #fbbf24; font-size: 15px; letter-spacing: 2px; margin-bottom: 12px; }
+.testimonial-stars .off { color: rgba(255, 255, 255, 0.15); }
+.testimonial-msg { color: var(--text); line-height: 1.7; font-style: italic; margin: 0 0 18px; }
+.testimonial-who { display: flex; align-items: center; gap: 12px; }
+.testimonial-avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #3f9d7a, #2b7359); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-josefin), sans-serif; font-weight: 700;
+}
+.testimonial-name { font-weight: 700; font-size: 14px; }
+.testimonial-meta { font-size: 12px; color: var(--muted); }
+.star-picker { display: flex; gap: 4px; }
+.star-picker button {
+  background: none; border: none; cursor: pointer; padding: 0;
+  font-size: 26px; line-height: 1; color: rgba(255, 255, 255, 0.2);
+}
+.star-picker button.on { color: #fbbf24; }
+
+/* ── LISTING DETAIL PAGE ── */
+.detail-grid {
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px;
+  max-width: 1100px; margin: 0 auto; align-items: start;
+}
+.detail-media {
+  height: 420px; border-radius: 18px; overflow: hidden;
+  background: var(--surface2); background-size: cover; background-position: center;
+  display: flex; align-items: center; justify-content: center; position: relative;
+  border: 1px solid var(--border);
+}
+.detail-emoji { font-size: 96px; }
+a.listing-title { color: var(--text); text-decoration: none; }
+a.listing-title:hover { color: #7fc9a6; }
+.detail-title { font-size: clamp(1.6rem, 3vw, 2.2rem); margin: 0 0 10px; }
+.detail-price {
+  font-family: var(--font-josefin), sans-serif; font-weight: 800;
+  font-size: 1.8rem; color: #7fc9a6;
+}
+.detail-loc { color: var(--muted); margin-top: 6px; }
+.detail-desc { color: var(--muted); line-height: 1.8; margin: 18px 0; }
+.detail-ref { font-size: 12px; color: var(--muted); }
+.detail-actions { display: flex; gap: 12px; margin-top: 22px; flex-wrap: wrap; align-items: center; }
+@media (max-width: 768px) {
+  .detail-grid { grid-template-columns: 1fr; }
+  .detail-media { height: 260px; }
+}
+
 /* ── SHARE MENU ── */
 .share-wrap { position: relative; display: inline-block; }
 .share-menu {
@@ -492,7 +547,7 @@ footer {
   gap: 16px; padding: 28px 32px; max-width: 1200px; margin: 0 auto;
 }
 .metric-card {
-  background: #0c1712;
+  background: #13241c;
   border: 1px solid rgba(63, 157, 122, 0.15);
   border-radius: var(--radius); padding: 24px;
   position: relative; overflow: hidden;
@@ -573,7 +628,7 @@ a.contact-row:hover { border-color: rgba(63, 157, 122, 0.35); transform: transla
   gap: 20px; max-width: 1200px; margin: 0 auto;
 }
 .dash-panel {
-  background: #0c1712;
+  background: #13241c;
   border: 1px solid rgba(63, 157, 122, 0.15);
   border-radius: var(--radius);
 }

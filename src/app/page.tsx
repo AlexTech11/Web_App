@@ -1,4 +1,31 @@
 import Link from "next/link";
+import ReviewForm from "@/components/ReviewForm";
+import { getSupabase } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
+
+interface Review {
+  id: string;
+  name: string;
+  location: string | null;
+  service: string | null;
+  rating: number;
+  message: string;
+}
+
+async function getReviews(): Promise<Review[]> {
+  try {
+    const { data } = await getSupabase()
+      .from("reviews")
+      .select("id, name, location, service, rating, message")
+      .eq("approved", true)
+      .order("created_at", { ascending: false })
+      .limit(9);
+    return (data as Review[]) ?? [];
+  } catch {
+    return [];
+  }
+}
 
 const services = [
   {
@@ -51,7 +78,8 @@ const services = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const reviews = await getReviews();
   return (
     <>
       <section id="hero">
@@ -160,6 +188,43 @@ export default function HomePage() {
               <p>Get approved and start driving, selling or renting immediately.</p>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="section">
+        <div className="section-header">
+          <div className="section-label">Testimonials</div>
+          <h2 className="section-title">What Our Clients Say</h2>
+          <p className="section-sub">Real feedback from drivers, buyers and renters.</p>
+        </div>
+
+        {reviews.length > 0 && (
+          <div className="testimonials-grid">
+            {reviews.map((r) => (
+              <div key={r.id} className="testimonial-card">
+                <div className="testimonial-stars">
+                  {"★".repeat(r.rating)}
+                  <span className="off">{"★".repeat(5 - r.rating)}</span>
+                </div>
+                <p className="testimonial-msg">“{r.message}”</p>
+                <div className="testimonial-who">
+                  <div className="testimonial-avatar">
+                    {r.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="testimonial-name">{r.name}</div>
+                    <div className="testimonial-meta">
+                      {[r.service, r.location].filter(Boolean).join(" · ")}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{ marginTop: reviews.length > 0 ? 50 : 0 }}>
+          <ReviewForm />
         </div>
       </div>
     </>
