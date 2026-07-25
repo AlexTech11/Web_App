@@ -5,6 +5,7 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/types";
 import DashboardDocuments from "@/components/DashboardDocuments";
 import ListingPhotosManager from "@/components/ListingPhotosManager";
+import BookingRow, { type DashboardBooking } from "@/components/BookingRow";
 import PayButton from "@/components/PayButton";
 import { paymentsEnabled } from "@/lib/paystack";
 import { getFee } from "@/lib/settings";
@@ -66,7 +67,9 @@ export default async function DashboardPage() {
       .order("created_at", { ascending: false }),
     supabase
       .from("bookings")
-      .select("id, reference_no, name, pickup_date, return_date, status, created_at")
+      .select(
+        "id, reference_no, name, phone, pickup_date, return_date, pickup_location, status, paid, created_at, listings(title, reference_no)"
+      )
       .eq("customer_id", user.id)
       .order("created_at", { ascending: false }),
   ]);
@@ -232,16 +235,7 @@ export default async function DashboardPage() {
               <div className="panel-empty">No bookings yet</div>
             ) : (
               bookings.map((b) => (
-                <div className="reg-row" key={b.id}>
-                  <div className="reg-avatar">🔑</div>
-                  <div className="reg-info">
-                    <div className="reg-name">Ref {b.reference_no}</div>
-                    <div className="reg-detail">
-                      {b.pickup_date} → {b.return_date}
-                    </div>
-                  </div>
-                  <StatusPill status={b.status} />
-                </div>
+                <BookingRow key={b.id} booking={b as unknown as DashboardBooking} />
               ))
             )}
           </div>

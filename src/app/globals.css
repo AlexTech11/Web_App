@@ -585,6 +585,13 @@ a.contact-row:hover { border-color: rgba(63, 157, 122, 0.35); transform: transla
 .reg-block:last-child { border-bottom: none; }
 .reg-block .reg-row { border-bottom: none; }
 .doc-checklist { padding: 0 0 4px 54px; }
+.reg-caret { color: var(--muted); font-size: 11px; }
+.booking-details {
+  padding: 8px 0 4px 54px; display: flex; flex-direction: column; gap: 6px;
+  font-size: 13px; color: var(--muted);
+}
+.booking-details > div { display: flex; gap: 6px; }
+@media (max-width: 768px) { .booking-details { padding-left: 0; } }
 .doc-grid { display: flex; flex-wrap: wrap; gap: 8px; }
 .doc-chip {
   display: inline-flex; align-items: center; gap: 6px;
