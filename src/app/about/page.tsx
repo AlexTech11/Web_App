@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import LeadershipPhoto from "@/components/LeadershipPhoto";
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -73,12 +74,7 @@ export default function AboutPage() {
         <h2 className="section-title">Meet the Team</h2>
       </div>
       <div className="form-container" style={{ textAlign: "center" }}>
-        <div
-          className="logo-icon"
-          style={{ width: 72, height: 72, fontSize: 28, margin: "0 auto 16px" }}
-        >
-          AU
-        </div>
+        <LeadershipPhoto />
         <div className="card-title" style={{ fontSize: 20 }}>Alex Ukpong</div>
         <div className="card-desc">Founder &amp; Chief Executive Officer</div>
         <p className="section-sub" style={{ maxWidth: 520, margin: "16px auto 0" }}>

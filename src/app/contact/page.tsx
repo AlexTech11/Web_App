@@ -43,12 +43,12 @@ export default function ContactPage() {
               0706 385 7328 · 0912 507 8090
             </span>
           </a>
-          <a className="contact-row" href="mailto:hello@afrosamboza.com.ng">
+          <a className="contact-row" href="mailto:afrosambozasupercars@gmail.com">
             <span className="contact-ic">📧</span>
             <span>
               <strong>Email</strong>
               <br />
-              hello@afrosamboza.com.ng
+              afrosambozasupercars@gmail.com
             </span>
           </a>
           <div className="contact-row">

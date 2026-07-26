@@ -54,7 +54,7 @@ export default async function DashboardPage() {
   if (!user) redirect("/login?next=/dashboard");
 
   const [profileRes, regsRes, listingsRes, bookingsRes] = await Promise.all([
-    supabase.from("profiles").select("full_name, phone, email, role").eq("id", user.id).single(),
+    supabase.from("profiles").select("full_name, phone, email, role, ban_status").eq("id", user.id).single(),
     supabase
       .from("driver_registrations")
       .select("id, reference_no, platform, vehicle_make, vehicle_model, vehicle_year, status, documents, paid, created_at")
@@ -94,6 +94,14 @@ export default async function DashboardPage() {
             Profile &amp; settings
           </Link>
         </div>
+        {profile?.ban_status && profile.ban_status !== "none" && (
+          <div className="error-msg" style={{ maxWidth: 640 }}>
+            ⚠️ Your account is currently <strong>restricted</strong> and cannot
+            submit new registrations or listings. Please contact the
+            administrator (afrosambozasupercars@gmail.com · 0706 385 7328) to
+            resolve this.
+          </div>
+        )}
       </div>
 
       <div className="metrics-grid">

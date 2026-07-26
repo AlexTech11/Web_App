@@ -19,7 +19,7 @@ export default function Footer() {
           <div className="footer-contact">
             <a href="tel:07063857328">📞 0706 385 7328</a>
             <a href="tel:09125078090">📞 0912 507 8090</a>
-            <a href="mailto:hello@afrosamboza.com.ng">📧 hello@afrosamboza.com.ng</a>
+            <a href="mailto:afrosambozasupercars@gmail.com">📧 afrosambozasupercars@gmail.com</a>
             <Link href="/contact">📍 Suite D27, Efab Shopping Mall, Area 11, Abuja, FCT</Link>
           </div>
         </div>

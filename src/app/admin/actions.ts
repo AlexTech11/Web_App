@@ -224,6 +224,42 @@ export async function setServiceFee(
   revalidatePath("/admin/settings");
 }
 
+/** Admin-only: set a user's ban status (none | partial | full). */
+export async function setBanStatus(userId: string, banStatus: string): Promise<void> {
+  if (!["none", "partial", "full"].includes(banStatus)) return;
+
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || user.id === userId) return; // can't ban yourself
+
+  const { data: me } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (me?.role !== "admin") return;
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ ban_status: banStatus, updated_at: new Date().toISOString() })
+    .eq("id", userId);
+  if (error) {
+    console.error("ban update failed:", error.message);
+    return;
+  }
+
+  await supabase.from("staff_activity").insert({
+    staff_id: user.id,
+    action: `ban:${banStatus}`,
+    entity_type: "profiles",
+    entity_id: userId,
+  });
+
+  revalidatePath("/admin/staff");
+}
+
 /** Staff: approve a review so it appears publicly. */
 export async function approveReview(id: string): Promise<void> {
   const supabase = await createSupabaseServer();

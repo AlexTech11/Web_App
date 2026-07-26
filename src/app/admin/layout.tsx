@@ -51,7 +51,9 @@ export default async function AdminLayout({
   return (
     <>
       <div className="dash-header">
-        <div className="dash-title">Staff Dashboard</div>
+        <div className="dash-title">
+          {profile.role.charAt(0).toUpperCase() + profile.role.slice(1)} Dashboard
+        </div>
         <div className="dash-sub">
           Signed in as {profile.full_name || user.email} ({profile.role})
         </div>

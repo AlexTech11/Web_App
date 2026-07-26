@@ -67,6 +67,19 @@ export async function submitDriverRegistration(
     return { ok: false, error: "Please sign in to submit your registration." };
   }
 
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("ban_status")
+    .eq("id", user.id)
+    .single();
+  if (prof && prof.ban_status !== "none") {
+    return {
+      ok: false,
+      error:
+        "Your account is restricted from new registrations. Please contact the administrator to resolve this.",
+    };
+  }
+
   const reference = makeReference();
   const { error } = await supabase
     .from("driver_registrations")
@@ -115,6 +128,21 @@ export async function submitListingInterest(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("ban_status")
+      .eq("id", user.id)
+      .single();
+    if (prof && prof.ban_status !== "none") {
+      return {
+        ok: false,
+        error:
+          "Your account is restricted from creating listings. Please contact the administrator to resolve this.",
+      };
+    }
+  }
 
   const reference = makeReference();
   const { error } = await supabase

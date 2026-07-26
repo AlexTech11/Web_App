@@ -60,14 +60,14 @@ export default function PrivacyPage() {
         <p>
           You may request access to, correction of, or deletion of your personal
           data at any time. Contact us at{" "}
-          <a href="mailto:hello@afrosamboza.com.ng">hello@afrosamboza.com.ng</a>{" "}
+          <a href="mailto:afrosambozasupercars@gmail.com">afrosambozasupercars@gmail.com</a>{" "}
           or 0706 385 7328.
         </p>
 
         <h3>6. Contact</h3>
         <p>
           AfroSamboza — Suite D27, Efab Shopping Mall, Area 11, Abuja, FCT.
-          Email: hello@afrosamboza.com.ng · Phone: 0706 385 7328.
+          Email: afrosambozasupercars@gmail.com · Phone: 0706 385 7328.
         </p>
       </div>
     </div>

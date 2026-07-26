@@ -367,6 +367,19 @@ textarea { resize: vertical; min-height: 100px; }
 .listing-meta span { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
 .listing-actions { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-wrap: wrap; }
 
+/* ── LEADERSHIP PHOTO (oval) ── */
+.leader-photo {
+  width: 160px; height: 200px; border-radius: 50%; overflow: hidden;
+  margin: 0 auto 18px; border: 3px solid rgba(127, 201, 166, 0.4);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+.leader-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.leader-photo.initials {
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #3f9d7a, #2b7359); color: #fff;
+  font-family: var(--font-josefin), sans-serif; font-weight: 800; font-size: 40px;
+}
+
 /* ── TESTIMONIALS ── */
 .testimonials-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;

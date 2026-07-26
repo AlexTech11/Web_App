@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { deleteUser, setUserRole } from "@/app/admin/actions";
+import { deleteUser, setBanStatus, setUserRole } from "@/app/admin/actions";
 import AdminSearch from "@/components/AdminSearch";
 import DeleteButton from "@/components/DeleteButton";
 
@@ -34,7 +34,7 @@ export default async function AdminStaffPage({
 
   let usersQuery = supabase
     .from("profiles")
-    .select("id, full_name, email, phone, role, created_at")
+    .select("id, full_name, email, phone, role, ban_status, created_at")
     .order("created_at", { ascending: false })
     .limit(200);
   if (q) usersQuery = usersQuery.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`);
@@ -77,6 +77,11 @@ export default async function AdminStaffPage({
                   <span className={`reg-status ${roleClass[p.role] ?? ""}`}>
                     {p.role}
                   </span>
+                  {p.ban_status && p.ban_status !== "none" && (
+                    <span className="reg-status status-rejected">
+                      {p.ban_status === "full" ? "🚫 banned" : "⚠️ restricted"}
+                    </span>
+                  )}
                   {!isSelf && (
                     <div className="admin-actions">
                       {p.role !== "staff" && (
@@ -94,6 +99,21 @@ export default async function AdminStaffPage({
                           <button className="btn btn-outline btn-sm danger">
                             Revoke
                           </button>
+                        </form>
+                      )}
+                      {p.ban_status !== "partial" && (
+                        <form action={setBanStatus.bind(null, p.id, "partial")}>
+                          <button className="btn btn-outline btn-sm danger">Partial Ban</button>
+                        </form>
+                      )}
+                      {p.ban_status !== "full" && (
+                        <form action={setBanStatus.bind(null, p.id, "full")}>
+                          <button className="btn btn-outline btn-sm danger">Full Ban</button>
+                        </form>
+                      )}
+                      {p.ban_status !== "none" && (
+                        <form action={setBanStatus.bind(null, p.id, "none")}>
+                          <button className="btn btn-outline btn-sm">Unban</button>
                         </form>
                       )}
                       <DeleteButton

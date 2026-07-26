@@ -35,8 +35,25 @@ export async function signIn(
     return { ok: false, error: parsed.error.issues[0].message };
 
   const supabase = await createSupabaseServer();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data: signInData, error } = await supabase.auth.signInWithPassword(
+    parsed.data
+  );
   if (error) return { ok: false, error: "Invalid email or password." };
+
+  // Full-banned accounts cannot sign in.
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("ban_status")
+    .eq("id", signInData.user.id)
+    .single();
+  if (prof?.ban_status === "full") {
+    await supabase.auth.signOut();
+    return {
+      ok: false,
+      error:
+        "Your account has been suspended. Please contact the administrator to resolve this.",
+    };
+  }
 
   revalidatePath("/", "layout");
   redirect((formData.get("next") as string) || "/dashboard");

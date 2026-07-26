@@ -64,19 +64,18 @@ export default function AuthCallbackPage() {
       <div className="section-header">
         <div className="section-label">Account</div>
         <h2 className="section-title">
-          {failed ? "Link Problem" : "Verifying…"}
+          {failed ? "Almost There" : "Verifying…"}
         </h2>
       </div>
       {failed ? (
-        <div className="form-container" style={{ maxWidth: 460, textAlign: "center" }}>
-          <div className="error-msg" style={{ marginTop: 0 }}>
-            ⚠️ This link is invalid or has expired.
+        <div className="form-container" style={{ maxWidth: 480, textAlign: "center" }}>
+          <div className="success-msg" style={{ marginTop: 0 }}>
+            ℹ️ Your account may already be active — this is often just a link
+            hiccup. Please <strong>try logging in</strong> below. If it still
+            doesn&apos;t work, register again for a fresh link.
           </div>
-          <p className="section-sub" style={{ marginTop: 16 }}>
-            Request a fresh link from the login page.
-          </p>
-          <Link href="/login" className="btn btn-gold" style={{ marginTop: 16 }}>
-            Back to Login
+          <Link href="/login" className="btn btn-gold" style={{ marginTop: 18 }}>
+            Go to Login
           </Link>
         </div>
       ) : (
