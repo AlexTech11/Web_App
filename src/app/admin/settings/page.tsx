@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { getFees } from "@/lib/settings";
+import { getFees, getSetting } from "@/lib/settings";
 import { paymentsEnabled } from "@/lib/paystack";
 import FeeSettingsForm from "@/components/FeeSettingsForm";
+import LeadershipUploader from "@/components/LeadershipUploader";
 
 export const dynamic = "force-dynamic";
 
@@ -20,11 +21,14 @@ export default async function AdminSettingsPage() {
     .single();
   if (me?.role !== "admin") redirect("/admin");
 
-  const fees = await getFees();
+  const [fees, leadershipUrl] = await Promise.all([
+    getFees(),
+    getSetting("leadership_photo_url"),
+  ]);
   const enabled = paymentsEnabled();
 
   return (
-    <div className="dash-content" style={{ display: "block" }}>
+    <div className="dash-content" style={{ display: "block", gap: 24 }}>
       {!enabled && (
         <div className="error-msg" style={{ maxWidth: 620 }}>
           ⚠️ Payments are not live yet. Set <code>NEXT_PUBLIC_PAYSTACK_ENABLED=true</code>,{" "}
@@ -33,6 +37,8 @@ export default async function AdminSettingsPage() {
         </div>
       )}
       <FeeSettingsForm fees={fees} />
+      <div style={{ height: 24 }} />
+      <LeadershipUploader current={leadershipUrl} />
     </div>
   );
 }

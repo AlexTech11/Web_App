@@ -224,6 +224,25 @@ export async function setServiceFee(
   revalidatePath("/admin/settings");
 }
 
+/** Admin-only: save an arbitrary string setting (RLS enforces is_admin). */
+export async function setSetting(key: string, value: string): Promise<void> {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { error } = await supabase
+    .from("settings")
+    .upsert({ key, value, updated_at: new Date().toISOString() });
+  if (error) {
+    console.error("setting save failed:", error.message);
+    return;
+  }
+  revalidatePath("/admin/settings");
+  revalidatePath("/about");
+}
+
 /** Admin-only: set a user's ban status (none | partial | full). */
 export async function setBanStatus(userId: string, banStatus: string): Promise<void> {
   if (!["none", "partial", "full"].includes(banStatus)) return;

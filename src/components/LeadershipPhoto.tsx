@@ -1,25 +1,19 @@
-"use client";
-
-import { useState } from "react";
+import { getSetting } from "@/lib/settings";
 
 /**
- * Oval CEO photo, served from the public Supabase Storage 'site-assets'
- * bucket (upload a file named leadership.jpg there). Falls back to initials
- * until the image exists.
+ * Oval CEO photo. Reads the URL saved by the admin (Settings → Leadership
+ * Photo) from the settings store; falls back to initials until one is set.
+ * Server component, so there is never a broken-image flash.
  */
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const PHOTO_URL = `${SUPABASE_URL}/storage/v1/object/public/site-assets/leadership.jpg`;
-
-export default function LeadershipPhoto() {
-  const [err, setErr] = useState(false);
-
-  if (err || !SUPABASE_URL) {
+export default async function LeadershipPhoto() {
+  const url = await getSetting("leadership_photo_url");
+  if (!url) {
     return <div className="leader-photo initials">AU</div>;
   }
   return (
     <div className="leader-photo">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={PHOTO_URL} alt="Alex Ukpong" onError={() => setErr(true)} />
+      <img src={url} alt="Alex Ukpong" />
     </div>
   );
 }

@@ -31,4 +31,20 @@ export async function getFee(purpose: PaymentPurpose): Promise<number> {
   return (await getFees())[purpose];
 }
 
+/** Read an arbitrary string setting (e.g. the leadership photo URL). */
+export async function getSetting(key: string): Promise<string | null> {
+  try {
+    const supabase = await createSupabaseServer();
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", key)
+      .maybeSingle();
+    if (data?.value == null) return null;
+    return typeof data.value === "string" ? data.value : String(data.value);
+  } catch {
+    return null;
+  }
+}
+
 export { FEE_KEY };
