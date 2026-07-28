@@ -40,6 +40,47 @@ export async function addRegistrationDocuments(
   return { ok: true };
 }
 
+/**
+ * Edit a listing's core details. The RPC allows the owner OR staff/admin, so
+ * users can only edit their own submissions while admins can edit any.
+ */
+export async function updateListing(
+  listingId: string,
+  formData: FormData
+): Promise<DocsResult> {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in again." };
+
+  const title = String(formData.get("title") ?? "").trim();
+  const location = String(formData.get("location") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const price = Number(formData.get("price"));
+
+  if (title.length < 3) return { ok: false, error: "Give the listing a longer title." };
+  if (!price || price <= 0) return { ok: false, error: "Enter a valid price." };
+  if (location.length < 2) return { ok: false, error: "Location is required." };
+
+  const { error } = await supabase.rpc("update_listing_details", {
+    p_id: listingId,
+    p_title: title,
+    p_price: price,
+    p_location: location,
+    p_description: description,
+  });
+  if (error) {
+    console.error("update_listing_details failed:", error.message);
+    return { ok: false, error: "Could not save changes — please try again." };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/listings");
+  revalidatePath("/listings");
+  return { ok: true };
+}
+
 /** Replace the photo list on one of the caller's own listings (max 10). */
 export async function setListingPhotos(
   listingId: string,

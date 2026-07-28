@@ -5,6 +5,7 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/types";
 import DashboardDocuments from "@/components/DashboardDocuments";
 import ListingPhotosManager from "@/components/ListingPhotosManager";
+import ListingEditor from "@/components/ListingEditor";
 import BookingRow, { type DashboardBooking } from "@/components/BookingRow";
 import PayButton from "@/components/PayButton";
 import { paymentsEnabled } from "@/lib/paystack";
@@ -62,7 +63,7 @@ export default async function DashboardPage() {
       .order("created_at", { ascending: false }),
     supabase
       .from("listings")
-      .select("id, reference_no, type, title, price, price_period, location, status, attributes, created_at")
+      .select("id, reference_no, type, title, price, price_period, location, description, status, attributes, created_at")
       .eq("owner_id", user.id)
       .order("created_at", { ascending: false }),
     supabase
@@ -222,6 +223,9 @@ export default async function DashboardPage() {
                         </div>
                       </div>
                       <StatusPill status={l.status} />
+                    </div>
+                    <div style={{ padding: "0 0 0 54px", marginTop: 4 }}>
+                      <ListingEditor listing={l} />
                     </div>
                     <ListingPhotosManager listingId={l.id} photos={photos} />
                   </div>

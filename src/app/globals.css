@@ -737,6 +737,10 @@ a.contact-row:hover { border-color: rgba(63, 157, 122, 0.35); transform: transla
 .admin-actions form { display: inline; }
 .admin-search { display: flex; gap: 8px; margin: 16px 0 4px; }
 .admin-search input { flex: 1; }
+.listing-edit {
+  width: 100%; margin-top: 10px; padding: 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+}
 .pay-email { display: inline-flex; gap: 6px; align-items: center; }
 .pay-email input { padding: 7px 10px; font-size: 13px; width: 160px; }
 .pay-error { color: #f87171; font-size: 12px; margin-left: 6px; }

@@ -4,6 +4,7 @@ import { deleteListing, setListingStatus } from "@/app/admin/actions";
 import { formatPrice } from "@/lib/types";
 import AdminSearch from "@/components/AdminSearch";
 import DeleteButton from "@/components/DeleteButton";
+import ListingEditor from "@/components/ListingEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -111,6 +112,7 @@ export default async function AdminListingsPage({
                       <button className="btn btn-outline btn-sm danger">Reject</button>
                     </form>
                   )}
+                  <ListingEditor listing={l} />
                   <DeleteButton
                     action={deleteListing}
                     id={l.id}
