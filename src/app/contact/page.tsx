@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
+import Socials from "@/components/Socials";
 import { whatsappLink, WHATSAPP_DISPLAY } from "@/lib/whatsapp";
 
 export const metadata: Metadata = {
@@ -66,6 +67,10 @@ export default function ContactPage() {
               <br />
               Mon–Sat, 9:00am – 6:00pm
             </span>
+          </div>
+          <div className="contact-row" style={{ display: "block" }}>
+            <strong>Follow us</strong>
+            <Socials />
           </div>
         </div>
 

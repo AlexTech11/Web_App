@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Socials from "@/components/Socials";
 
 export default function Footer() {
   return (
@@ -22,6 +23,7 @@ export default function Footer() {
             <a href="mailto:afrosambozasupercars@gmail.com">📧 afrosambozasupercars@gmail.com</a>
             <Link href="/contact">📍 Suite D27, Efab Shopping Mall, Area 11, Abuja, FCT</Link>
           </div>
+          <Socials />
         </div>
         <div className="footer-col">
           <h4>Services</h4>
