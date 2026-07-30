@@ -43,7 +43,7 @@ export default async function AdminLayout({
     profile.role === "admin"
       ? [
           ...baseLinks,
-          { href: "/admin/staff", label: "Staff" },
+          { href: "/admin/staff", label: "Users" },
           { href: "/admin/settings", label: "Settings" },
         ]
       : baseLinks;

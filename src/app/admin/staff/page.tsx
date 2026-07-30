@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { deleteUser, setBanStatus, setUserRole } from "@/app/admin/actions";
@@ -44,7 +45,7 @@ export default async function AdminStaffPage({
     <div className="dash-content" style={{ display: "block" }}>
       <div className="dash-panel full">
         <div className="panel-header">
-          <div className="panel-title">Staff & Users</div>
+          <div className="panel-title">Users</div>
           <span style={{ fontSize: 12, color: "var(--muted)" }}>
             Admin only — promote users, or remove accounts
           </span>
@@ -65,7 +66,9 @@ export default async function AdminStaffPage({
                   </div>
                   <div className="reg-info">
                     <div className="reg-name">
-                      {p.full_name || "(no name)"}
+                      <Link href={`/admin/users/${p.id}`} style={{ color: "inherit" }}>
+                        {p.full_name || "(no name)"}
+                      </Link>
                       {isSelf ? " — you" : ""}
                     </div>
                     <div className="reg-detail">
