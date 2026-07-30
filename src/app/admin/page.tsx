@@ -54,10 +54,12 @@ export default async function AdminOverviewPage() {
     count(supabase, "bookings", { status: "requested" }),
   ]);
 
-  const [{ count: pendingReviews }, { data: paidRows }] = await Promise.all([
-    supabase.from("reviews").select("id", { count: "exact", head: true }).eq("approved", false),
-    supabase.from("payments").select("amount_kobo").eq("status", "paid"),
-  ]);
+  const [{ count: pendingReviews }, { count: totalUsers }, { data: paidRows }] =
+    await Promise.all([
+      supabase.from("reviews").select("id", { count: "exact", head: true }).eq("approved", false),
+      supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("payments").select("amount_kobo").eq("status", "paid"),
+    ]);
   const collectedNgn =
     (paidRows ?? []).reduce((sum, r) => sum + Number(r.amount_kobo), 0) / 100;
 
@@ -104,6 +106,10 @@ export default async function AdminOverviewPage() {
         <Link href="/admin/reviews?status=pending" className="metric-card amber">
           <div className="metric-label">Reviews to Approve</div>
           <div className="metric-val">{pendingReviews ?? 0}</div>
+        </Link>
+        <Link href="/admin/staff" className="metric-card">
+          <div className="metric-label">Total Users</div>
+          <div className="metric-val">{totalUsers ?? 0}</div>
         </Link>
       </div>
 
