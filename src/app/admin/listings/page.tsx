@@ -32,7 +32,7 @@ export default async function AdminListingsPage({
   let query = supabase
     .from("listings")
     .select(
-      "id, reference_no, type, title, price, price_period, location, description, contact_name, contact_phone, status, created_at"
+      "id, reference_no, type, title, price, price_period, location, description, contact_name, contact_phone, status, attributes, created_at"
     )
     .order("created_at", { ascending: false })
     .limit(100);
@@ -112,7 +112,21 @@ export default async function AdminListingsPage({
                       <button className="btn btn-outline btn-sm danger">Reject</button>
                     </form>
                   )}
-                  <ListingEditor listing={l} />
+                  <ListingEditor
+                    listing={{
+                      id: l.id,
+                      title: l.title,
+                      price: l.price,
+                      price_period: l.price_period as "day" | "year" | null,
+                      location: l.location,
+                      description: l.description,
+                      photos: Array.isArray(
+                        (l.attributes as Record<string, unknown> | null)?.photos
+                      )
+                        ? ((l.attributes as { photos: string[] }).photos)
+                        : [],
+                    }}
+                  />
                   <DeleteButton
                     action={deleteListing}
                     id={l.id}

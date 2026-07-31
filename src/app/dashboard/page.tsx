@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/types";
 import DashboardDocuments from "@/components/DashboardDocuments";
-import ListingPhotosManager from "@/components/ListingPhotosManager";
 import ListingEditor from "@/components/ListingEditor";
 import BookingRow, { type DashboardBooking } from "@/components/BookingRow";
 import PayButton from "@/components/PayButton";
@@ -225,9 +224,18 @@ export default async function DashboardPage() {
                       <StatusPill status={l.status} />
                     </div>
                     <div style={{ padding: "0 0 0 54px", marginTop: 4 }}>
-                      <ListingEditor listing={l} />
+                      <ListingEditor
+                        listing={{
+                          id: l.id,
+                          title: l.title,
+                          price: l.price,
+                          price_period: l.price_period as "day" | "year" | null,
+                          location: l.location,
+                          description: l.description,
+                          photos,
+                        }}
+                      />
                     </div>
-                    <ListingPhotosManager listingId={l.id} photos={photos} />
                   </div>
                 );
               })

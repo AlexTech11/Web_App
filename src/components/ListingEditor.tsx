@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateListing } from "@/app/dashboard/actions";
+import ListingPhotosManager from "@/components/ListingPhotosManager";
 
 export interface EditableListing {
   id: string;
@@ -11,6 +12,7 @@ export interface EditableListing {
   price_period: "day" | "year" | null;
   location: string;
   description: string | null;
+  photos?: string[];
 }
 
 export default function ListingEditor({ listing }: { listing: EditableListing }) {
@@ -68,6 +70,12 @@ export default function ListingEditor({ listing }: { listing: EditableListing })
           <textarea name="description" defaultValue={listing.description ?? ""} />
         </div>
       </div>
+
+      <div className="field span2" style={{ marginTop: 16 }}>
+        <label>Photos (add or remove — up to 10)</label>
+        <ListingPhotosManager listingId={listing.id} photos={listing.photos ?? []} />
+      </div>
+
       {error && <div className="error-msg">⚠️ {error}</div>}
       <div className="form-actions">
         <button type="submit" className="btn-primary" disabled={busy}>
